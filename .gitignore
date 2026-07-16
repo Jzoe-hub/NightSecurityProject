@@ -5,19 +5,18 @@
 
 # --- 编译中间产物（每次编译都会变，没必要追踪）---
 *.o         # C 编译生成的目标文件
-*.axf       # Keil 链接输出文件
+*.d         # 依赖文件
+*.elf       # 链接输出文件
 *.lst       # 汇编列表文件
 *.map       # 内存映射文件
-Objects/    # Keil 编译输出目录
-Listings/   # Keil 列表文件目录
+Debug/      # STM32CubeIDE 编译输出目录
 
 # --- 烧录文件（体积大，随时可重新编译生成）---
 *.hex
 *.bin
 
-# --- Keil 用户个人配置（自己电脑的设置，不用共享）---
-*.uvguix.*
-*.uvoptx
+# --- STM32CubeIDE 工作区元数据（个人电脑的 IDE 状态，不用共享）---
+software/.metadata/
 
 # --- 可执行文件和库（工具软件，非源码）---
 *.exe
