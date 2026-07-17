@@ -22,7 +22,6 @@
 #include "adc.h"
 #include "dma.h"
 #include "i2c.h"
-#include "iwdg.h"
 #include "rtc.h"
 #include "tim.h"
 #include "usart.h"
@@ -101,7 +100,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_I2C1_Init();
-  MX_IWDG_Init();
   MX_RTC_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
@@ -122,6 +120,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
