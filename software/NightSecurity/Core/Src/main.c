@@ -29,7 +29,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "oled.h"
+#include "mq7.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +52,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static uint16_t g_adc_raw[3] = {0};//ADC DMA 缓冲区：TIM3 每 100ms 触发一次扫描, 3 通道结果由 DMA 自动填入
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,7 +106,26 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  OLED_Init();
+  OLED_Clear();
+  OLED_PrintString(0, 0, "MQ7 CO SENSER");
+  OLED_PrintString(0, 2, "Starting...");
+  HAL_Delay(1000);
 
+  HAL_TIM_Base_Start(&htim3);//开启定时器3，每100ms产生TRGO触发ADC扫描
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)g_adc_raw, 3);//启动ADC＋DMA，扫描3通道，DMA循环搬运到g_adc_raw
+  while(1)
+  {
+  uint16_t raw = g_adc_raw[MQ7_ADC_INDEX];
+  char buf[16];
+  float ppm = MQ7_RawToPPM(raw);
+  OLED_Clear();
+  sprintf((char*)buf,"ADC:%d",raw);
+  OLED_PrintString(0,0,buf);
+  sprintf((char*)buf, "PPM:%.2f", ppm);
+  OLED_PrintString(0,2,buf);
+  HAL_Delay(500);
+  }
   /* USER CODE END 2 */
 
   /* Init scheduler */
