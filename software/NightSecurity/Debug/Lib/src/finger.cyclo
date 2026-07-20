@@ -1,0 +1,10 @@
+../Lib/src/finger.c:36:9:Finger_IsTouched	1
+../Lib/src/finger.c:50:13:fp_send_packet	2
+../Lib/src/finger.c:83:13:fp_send_cmd	1
+../Lib/src/finger.c:88:13:fp_send_cmd2	1
+../Lib/src/finger.c:93:13:fp_send_cmd3	1
+../Lib/src/finger.c:113:13:fp_recv_response	8
+../Lib/src/finger.c:147:6:Finger_ReadSysPara	1
+../Lib/src/finger.c:160:6:Finger_Enroll	5
+../Lib/src/finger.c:194:6:Finger_Search	3
+../Lib/src/finger.c:214:6:Finger_ClearAll	1

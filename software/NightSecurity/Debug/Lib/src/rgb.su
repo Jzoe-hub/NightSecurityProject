@@ -1,0 +1,2 @@
+../Lib/src/rgb.c:9:6:RGB_Set	16	static
+../Lib/src/rgb.c:16:6:RGB_Off	8	static

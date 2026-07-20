@@ -1,0 +1,11 @@
+../Lib/src/dht11.c:18:13:udelay	24	static,ignoring_inline_asm
+../Lib/src/dht11.c:30:13:DHT11_PinCfgAsOutput	4	static
+../Lib/src/dht11.c:39:13:DHT11_PinCfgAsInput	8	static
+../Lib/src/dht11.c:49:13:DHT11_PinSet	16	static
+../Lib/src/dht11.c:60:12:DHT11_PinRead	8	static
+../Lib/src/dht11.c:71:13:DHT11_Start	8	static
+../Lib/src/dht11.c:83:12:DHT11_Wait_Ack	8	static
+../Lib/src/dht11.c:96:12:DHT11_WaitFor_Val	16	static
+../Lib/src/dht11.c:115:12:DHT11_ReadByte	16	static
+../Lib/src/dht11.c:142:6:DHT11_Init	8	static
+../Lib/src/dht11.c:161:5:DHT11_Read	24	static

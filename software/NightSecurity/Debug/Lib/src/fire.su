@@ -1,0 +1,2 @@
+../Lib/src/fire.c:23:10:Fire_GetIntensity	16	static
+../Lib/src/fire.c:36:9:Fire_IsDetected	8	static
