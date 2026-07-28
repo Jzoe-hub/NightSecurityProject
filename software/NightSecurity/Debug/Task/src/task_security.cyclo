@@ -1,0 +1,5 @@
+../Task/src/task_security.c:25:16:check_fire	1
+../Task/src/task_security.c:47:16:check_intrusion	1
+../Task/src/task_security.c:72:16:run_state_machine	1
+../Task/src/task_security.c:91:13:dispatch_alarm	1
+../Task/src/task_security.c:109:6:SecurityTask	1

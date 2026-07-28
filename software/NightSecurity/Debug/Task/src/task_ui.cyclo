@@ -1,0 +1,5 @@
+../Task/src/task_ui.c:25:13:ui_show_sensors	1
+../Task/src/task_ui.c:40:13:ui_show_status	1
+../Task/src/task_ui.c:57:16:ui_scan_keys	1
+../Task/src/task_ui.c:82:13:ui_run_menu	1
+../Task/src/task_ui.c:98:6:UITask	1

@@ -1,0 +1,6 @@
+../Task/src/task_sensor.c:40:13:read_adc_sensors	1
+../Task/src/task_sensor.c:59:13:read_binary_sensors	1
+../Task/src/task_sensor.c:78:13:read_dht11_data	2
+../Task/src/task_sensor.c:112:13:read_radar_data	1
+../Task/src/task_sensor.c:134:13:publish_sensor_data	1
+../Task/src/task_sensor.c:172:6:SensorTask	1

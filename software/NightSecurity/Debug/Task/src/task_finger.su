@@ -1,0 +1,4 @@
+../Task/src/task_finger.c:24:13:finger_wait_touch	16	static
+../Task/src/task_finger.c:41:13:finger_do_enroll	4	static
+../Task/src/task_finger.c:59:13:finger_do_verify	4	static
+../Task/src/task_finger.c:78:6:FingerTask	16	static
