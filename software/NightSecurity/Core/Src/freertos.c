@@ -100,20 +100,20 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	g_sensorQueue = xQueueCreate(5,sizeof(SensorPacket));
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+	defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-
-  xTaskCreate(SensorTask,"Sensor",256,NULL,3,&g_SensorTaskHandle);//火灾/入侵的各类传感器读取数据
-  xTaskCreate(SecurityTask,"Security",512,NULL,4,&g_SecurityTaskHandle);//对传感器数据融合处理
-  xTaskCreate(AlarmTask,"Alarm",256,NULL,5,&g_AlarmTaskHandle);//由处理后的数据进行本地声光报警
-  xTaskCreate(UITask,"UI",384,NULL,2,&g_UITaskHandle);//OLED显示各数据，菜单状态机，按键控制。
-  xTaskCreate(FingerTask,"Finger",384,NULL,2,&g_FingerTaskHandle);//指纹验证处理
-  xTaskCreate(WatchdogTask, "Watchdog", 128, NULL, 6, &g_WatchdogTaskHandle);//看门狗
+	xTaskCreate(SensorTask,"Sensor",256,NULL,3,&g_SensorTaskHandle);//火灾/入侵的各类传感器读取数据
+	xTaskCreate(SecurityTask,"Security",512,NULL,4,&g_SecurityTaskHandle);//对传感器数据融合处理
+	xTaskCreate(AlarmTask,"Alarm",256,NULL,5,&g_AlarmTaskHandle);//由处理后的数据进行本地声光报警
+	xTaskCreate(UITask,"UI",384,NULL,2,&g_UITaskHandle);//OLED显示各数据，菜单状态机，按键控制。
+	xTaskCreate(FingerTask,"Finger",384,NULL,2,&g_FingerTaskHandle);//指纹验证处理
+	xTaskCreate(WatchdogTask, "Watchdog", 128, NULL, 6, &g_WatchdogTaskHandle);//看门狗
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

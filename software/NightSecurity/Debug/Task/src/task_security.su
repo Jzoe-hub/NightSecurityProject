@@ -1,5 +1,5 @@
-../Task/src/task_security.c:25:16:check_fire	24	static
-../Task/src/task_security.c:47:16:check_intrusion	16	static
-../Task/src/task_security.c:72:16:run_state_machine	16	static
-../Task/src/task_security.c:91:13:dispatch_alarm	16	static
-../Task/src/task_security.c:109:6:SecurityTask	24	static
+../Task/src/task_security.c:34:16:check_fire	32	static
+../Task/src/task_security.c:72:16:check_intrusion	32	static
+../Task/src/task_security.c:116:16:run_state_machine	16	static
+../Task/src/task_security.c:179:13:dispatch_alarm	16	static
+../Task/src/task_security.c:198:6:SecurityTask	32	static

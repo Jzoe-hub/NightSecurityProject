@@ -152,8 +152,10 @@ static void publish_sensor_data(float smoke, float co, uint16_t fire_int,
 		Sensor_intrusion.static_dist    = static_dist;
 		Sensor_intrusion.static_energy  = static_energy;
 
-		(void)Sensor_fire;       /* TODO: 队列建成后 xQueueSend */
-		(void)Sensor_intrusion;
+	SensorPacket Sensor_Data;
+	Sensor_Data.fire = Sensor_fire;
+	Sensor_Data.intrusion = Sensor_intrusion;
+	xQueueSend(g_sensorQueue,&Sensor_Data,0);
 }
 
 /* ==================== 任务函数 ==================== */
@@ -179,8 +181,7 @@ void SensorTask(void *pvParameters)
 		read_binary_sensors(&pir_triggered, &fire_do);
 		read_dht11_data(&temp, &hum);
 		read_radar_data(&has_person, &motion_dist, &motion_energy, &static_dist, &static_energy);
-		publish_sensor_data(smoke_ppm, co_ppm, fire_int,
-				pir_triggered, fire_do, temp, hum, has_person);
+		publish_sensor_data(smoke_ppm, co_ppm, fire_int,pir_triggered, fire_do, temp, hum, has_person);
 		vTaskDelay(pdMS_TO_TICKS(100));
 	}
 }

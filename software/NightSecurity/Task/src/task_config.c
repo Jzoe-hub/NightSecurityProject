@@ -12,4 +12,6 @@ TaskHandle_t g_UITaskHandle      = NULL;
 TaskHandle_t g_FingerTaskHandle  = NULL;
 TaskHandle_t g_WatchdogTaskHandle = NULL;
 
-/* ===== 队列/信号量（Phase 2 后续添加） ===== */
+/* ===== 队列/信号量句柄定义 ===== */
+QueueHandle_t g_sensorQueue = NULL;
+SensorPacket Sensor_Data;

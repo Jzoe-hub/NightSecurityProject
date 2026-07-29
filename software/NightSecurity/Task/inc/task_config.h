@@ -6,10 +6,10 @@
 #define __TASK_CONFIG_H
 
 #include "FreeRTOS.h"
-#include "list.h"
 #include "task.h"
+#include "queue.h"
 
-/*====================共用变量=========================*/
+/*====================共用结构体和全局变量=========================*/
 
 //传感器变量
 typedef struct{
@@ -29,8 +29,15 @@ typedef struct{
 		uint16_t static_dist;
 	}SensorIntrusionData;
 
+/* 打包传感器数据, 队列一次传一整包 */
+typedef struct {
+	SensorFireData      fire;
+	SensorIntrusionData intrusion;
+} SensorPacket;
 
-/*==================任务函数和句柄======================*/
+extern SensorPacket Sensor_Data;
+
+/*==================任务函数和任务句柄======================*/
 void SensorTask(void *pvParameters);
 void SecurityTask(void *pvParameters);
 void AlarmTask(void *pvParameters);
@@ -44,5 +51,10 @@ extern TaskHandle_t g_AlarmTaskHandle;
 extern TaskHandle_t g_UITaskHandle;
 extern TaskHandle_t g_FingerTaskHandle;
 extern TaskHandle_t g_WatchdogTaskHandle;
+
+/*==================队列句柄======================*/
+
+/* 队列句柄 */
+extern QueueHandle_t g_sensorQueue;
 
 #endif /* __TASK_CONFIG_H */

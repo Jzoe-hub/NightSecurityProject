@@ -5,7 +5,16 @@
  ***********************************************************************/
 #include "task_config.h"
 
-/* ==================== 判定子函数 ==================== */
+/*======================宏定义和全局变量====================*/
+#define STATE_DISARMED  0
+#define STATE_ARMED     1
+#define STATE_WARNING   2
+#define STATE_ALARM     3
+
+uint8_t fire_level;
+uint8_t intrusion_level;
+uint8_t state_result;
+/* ==================== 融合处理子函数 ==================== */
 
 /**********************************************************************
  * 函数名称： check_fire
@@ -23,18 +32,34 @@
  * 返 回 值： 0=安全, 1=火灾预警, 2=确认火灾
  ***********************************************************************/
 static uint8_t check_fire(float smoke_ppm, float co_ppm,
-		uint16_t fire_int, int temp)
+        uint16_t fire_int, int temp)
 {
-	/* TODO */
-	return 0;
+    float score = 0;
+    /* 1. 火焰强度: 大于 2000 说明有明显火焰, 贡献 40 分 */
+    if (fire_int > 2000)
+        score += 40;
+    /* 2. MQ-2 烟雾: 超过 10ppm 说明有烟雾, 贡献 30 分 */
+    if (smoke_ppm > 10)
+        score += 30;
+    /* 3. MQ-7 CO: 超过 10ppm 说明有一氧化碳, 贡献 20 分 */
+    if (co_ppm > 10)
+        score += 20;
+    /* 4. 温度: 超过 45℃ 说明环境异常升温, 贡献 10 分 */
+    if (temp > 45)
+        score += 10;
+    /* 判定: 总分 100, ≥60 确认火灾, ≥30 预警 */
+    if (score < 30)       return 0;
+    else if (score < 60)  return 1;
+    else                  return 2;
 }
+
 
 /**********************************************************************
  * 函数名称： check_intrusion
  * 功能描述： 综合 PIR + 雷达运动目标 + 雷达静止目标三个维度,
  *           加权评分判断是否有人入侵。
  *           评分逻辑：
- *           1. PIR 触发:   直接贡献 30 分
+ *           1. PIR/雷达检测到有人:   直接贡献 30 分
  *           2. 雷达运动目标: has_motion → 25 分
  *              + 距离 < 200cm → 额外 15 分
  *           3. 雷达静止目标: has_static → 50 分（静止人体置信度高）
@@ -45,10 +70,29 @@ static uint8_t check_fire(float smoke_ppm, float co_ppm,
  * 返 回 值： 0=安全, 1=可疑, 2=确认入侵
  ***********************************************************************/
 static uint8_t check_intrusion(uint8_t pir, uint8_t has_person,
-		uint16_t motion_dist, uint8_t has_motion, uint8_t has_static)
+		uint16_t motion_dist, uint8_t motion_energy, uint8_t static_energy)
 {
 	/* TODO */
-	return 0;
+	float score = 0;
+	if(pir == 1||has_person==1)
+	{
+		score = score + 30;
+	}
+	if(motion_dist < 200)
+	{
+		score = score + 15;
+	}
+	if(motion_energy >= 1)
+	{
+		score = score + 25;
+	}
+	if(static_energy >= 1)
+	{
+		score = score + 50;
+	}
+	if(score < 30) 		return 0;
+	else if(score <60) 	return 1;
+	else				return 2;
 }
 
 /**********************************************************************
@@ -71,7 +115,51 @@ static uint8_t check_intrusion(uint8_t pir, uint8_t has_person,
  ***********************************************************************/
 static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 {
-	/* TODO: 用 static 变量保存 current_state + confirm_counter */
+	/* TODO: 用 static 变量保存 state + counter */
+	static uint8_t state = STATE_DISARMED;
+	static uint8_t counter = 0;
+
+	switch(state)
+	{
+	case STATE_DISARMED:
+		if(fire_level>=1)
+		{
+			state   = STATE_WARNING;
+			counter = 1;
+			return 1;
+		}
+		return 0;
+		break;
+	case STATE_ARMED:
+		if(fire_level>=1 || intrusion_level>=1)
+		{
+			state = STATE_WARNING;
+			counter = 1;
+			return 1;
+		}else return 0;
+		break;
+	case STATE_WARNING:
+		if(fire_level>=1 || intrusion_level>=1)
+		{
+			counter++;
+			if(counter>=3)
+			{
+				state = STATE_ALARM;
+				return 2;
+			}else return 1;
+		}else{
+			counter--;
+			if(counter<=0)
+			{
+				state = STATE_ARMED;
+			}
+			return 0;
+		}
+		break;
+	case STATE_ALARM:
+		return 2;
+		break;
+	}
 	return 0;
 }
 
@@ -91,6 +179,7 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 static void dispatch_alarm(uint8_t level)
 {
 	/* TODO */
+
 }
 
 /* ==================== 任务主函数 ==================== */
@@ -108,12 +197,22 @@ static void dispatch_alarm(uint8_t level)
  ***********************************************************************/
 void SecurityTask(void *pvParameters)
 {
-	TickType_t xLastWakeTime = xTaskGetTickCount();
 	(void)pvParameters;
-
 	for (;;)
 	{
 		/* TODO: 队列接收 → check_fire → check_intrusion → 状态机 → dispatch */
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100));
+		xQueueReceive(g_sensorQueue,&Sensor_Data,portMAX_DELAY);
+		fire_level = check_fire(Sensor_Data.fire.smoke_ppm,
+				Sensor_Data.fire.co_ppm,
+				Sensor_Data.fire.fire_int,
+				Sensor_Data.fire.temp);
+		intrusion_level = check_intrusion(Sensor_Data.intrusion.pir_triggered,
+										Sensor_Data.intrusion.has_person,
+										Sensor_Data.intrusion.motion_dist,
+										Sensor_Data.intrusion.motion_energy,
+										Sensor_Data.intrusion.static_energy);
+		state_result = run_state_machine(fire_level,intrusion_level);
+		dispatch_alarm(state_result);
+		vTaskDelay(pdMS_TO_TICKS(100));
 	}
 }
