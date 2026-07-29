@@ -1,4 +1,4 @@
-../Task/src/task_alarm.c:25:13:alarm_fire	1
-../Task/src/task_alarm.c:41:13:alarm_intrusion	1
-../Task/src/task_alarm.c:57:13:alarm_idle	1
-../Task/src/task_alarm.c:74:6:AlarmTask	1
+../Task/src/task_alarm.c:25:13:alarm_fire	4
+../Task/src/task_alarm.c:64:13:alarm_intrusion	4
+../Task/src/task_alarm.c:103:13:alarm_idle	1
+../Task/src/task_alarm.c:121:6:AlarmTask	4

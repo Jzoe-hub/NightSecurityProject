@@ -20,7 +20,7 @@ uint8_t pir_triggered,fire_do;
 int temp,hum;
 uint8_t has_person,motion_energy,static_energy;
 uint16_t motion_dist,static_dist;
-
+SensorPacket Sensor_Data;
 
 /* ==================== 传感器读取子函数 ==================== */
 
@@ -39,10 +39,9 @@ uint16_t motion_dist,static_dist;
  ***********************************************************************/
 static void read_adc_sensors(float *smoke_ppm, float *co_ppm, uint16_t *fire_int)
 {
-	/* TODO */
-	*smoke_ppm = MQ2_RawToPPM(g_adc_raw[MQ2_ADC_INDEX]);
-	*co_ppm = MQ7_RawToPPM(g_adc_raw[MQ7_ADC_INDEX]);
-	*fire_int = Fire_GetIntensity(g_adc_raw[FIRE_ADC_INDEX]);
+	*smoke_ppm = MQ2_RawToPPM(g_adc_raw[MQ2_ADC_INDEX]);   // ADC 码值 → ppm
+	*co_ppm   = MQ7_RawToPPM(g_adc_raw[MQ7_ADC_INDEX]);
+	*fire_int = Fire_GetIntensity(g_adc_raw[FIRE_ADC_INDEX]); // 4095-raw 取反
 }
 
 /**********************************************************************
@@ -58,9 +57,8 @@ static void read_adc_sensors(float *smoke_ppm, float *co_ppm, uint16_t *fire_int
  ***********************************************************************/
 static void read_binary_sensors(uint8_t *pir_triggered, uint8_t *fire_do)
 {
-	/* TODO */
-	*pir_triggered = PIR_Read();
-	*fire_do  = Fire_IsDetected();
+	*pir_triggered = PIR_Read();        // 1=有人 0=无人
+	*fire_do       = Fire_IsDetected(); // 0=火 1=无火
 }
 
 /**********************************************************************
@@ -77,20 +75,21 @@ static void read_binary_sensors(uint8_t *pir_triggered, uint8_t *fire_do)
  ***********************************************************************/
 static void read_dht11_data(int *temp, int *hum)
 {
-	/* TODO */
-	static uint16_t tick=0;
-	static int last_temp = 0;
-	static int last_hum = 0;
+	static uint16_t tick = 0;           // 100ms 计数器
+	static int last_temp = 0;           // 温度缓存
+	static int last_hum  = 0;           // 湿度缓存
 	tick++;
-	if(tick>=20)
+	if (tick >= 20)                     // 20×100ms = 2s, 可读
 	{
-		DHT11_Read(hum,temp);
-		last_temp = *temp; //更新缓存
-		last_hum = *hum;
+		DHT11_Read(hum, temp);
+		last_temp = *temp;              // 更新缓存
+		last_hum  = *hum;
 		tick = 0;
-	}else{
-		*temp = last_temp; //读取缓存值
-		*hum = last_hum;
+	}
+	else                                // 不到 2 秒, 返回旧值
+	{
+		*temp = last_temp;
+		*hum  = last_hum;
 	}
 }
 
@@ -112,11 +111,10 @@ static void read_dht11_data(int *temp, int *hum)
 static void read_radar_data(uint8_t *has_person, uint16_t *motion_dist,
 		uint8_t *motion_energy, uint16_t *static_dist, uint8_t *static_energy)
 {
-	/* TODO */
-	*has_person = Detection_Target_LD2410C.STATE_target;
-	*motion_dist = Detection_Target_LD2410C.MOTION_target_distance;
+	*has_person    = Detection_Target_LD2410C.STATE_target;
+	*motion_dist   = Detection_Target_LD2410C.MOTION_target_distance;
 	*motion_energy = Detection_Target_LD2410C.MOTION_target_energy;
-	*static_dist = Detection_Target_LD2410C.STATIC_target_distance;
+	*static_dist   = Detection_Target_LD2410C.STATIC_target_distance;
 	*static_energy = Detection_Target_LD2410C.STATIC_target_energy;
 }
 
@@ -135,7 +133,6 @@ static void publish_sensor_data(float smoke, float co, uint16_t fire_int,
 		uint8_t pir, uint8_t fire_do, int temp, int hum,
 		uint8_t has_person)
 {
-	/* TODO */
 	SensorFireData Sensor_fire;
 		Sensor_fire.smoke_ppm		   = smoke;
 		Sensor_fire.co_ppm			   = co;
@@ -152,10 +149,9 @@ static void publish_sensor_data(float smoke, float co, uint16_t fire_int,
 		Sensor_intrusion.static_dist    = static_dist;
 		Sensor_intrusion.static_energy  = static_energy;
 
-	SensorPacket Sensor_Data;
 	Sensor_Data.fire = Sensor_fire;
 	Sensor_Data.intrusion = Sensor_intrusion;
-	xQueueSend(g_sensorQueue,&Sensor_Data,0);
+	xQueueSend(g_sensorQueue, &Sensor_Data, 0);    // 发给 SecurityTask
 }
 
 /* ==================== 任务函数 ==================== */

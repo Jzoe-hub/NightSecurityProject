@@ -28,14 +28,19 @@ typedef struct{
 		uint16_t motion_dist;
 		uint16_t static_dist;
 	}SensorIntrusionData;
-
-/* 打包传感器数据, 队列一次传一整包 */
 typedef struct {
 	SensorFireData      fire;
 	SensorIntrusionData intrusion;
-} SensorPacket;
+} SensorPacket; //* 打包传感器数据, 队列一次传一整包
+
+//融合后报警状态结构体
+typedef struct{
+	int type;
+	int level;
+}AlarmCMD;
 
 extern SensorPacket Sensor_Data;
+extern AlarmCMD Security_Data;
 
 /*==================任务函数和任务句柄======================*/
 void SensorTask(void *pvParameters);
@@ -56,5 +61,6 @@ extern TaskHandle_t g_WatchdogTaskHandle;
 
 /* 队列句柄 */
 extern QueueHandle_t g_sensorQueue;
+extern QueueHandle_t g_securityQueue;
 
 #endif /* __TASK_CONFIG_H */

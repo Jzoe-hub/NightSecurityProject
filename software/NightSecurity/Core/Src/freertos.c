@@ -101,6 +101,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
 	g_sensorQueue = xQueueCreate(5,sizeof(SensorPacket));
+	g_securityQueue = xQueueCreate(5,sizeof(AlarmCMD));
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */

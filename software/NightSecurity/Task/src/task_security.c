@@ -14,6 +14,8 @@
 uint8_t fire_level;
 uint8_t intrusion_level;
 uint8_t state_result;
+AlarmCMD Security_Data;
+
 /* ==================== 融合处理子函数 ==================== */
 
 /**********************************************************************
@@ -72,27 +74,23 @@ static uint8_t check_fire(float smoke_ppm, float co_ppm,
 static uint8_t check_intrusion(uint8_t pir, uint8_t has_person,
 		uint16_t motion_dist, uint8_t motion_energy, uint8_t static_energy)
 {
-	/* TODO */
 	float score = 0;
-	if(pir == 1||has_person==1)
-	{
-		score = score + 30;
-	}
-	if(motion_dist < 200)
-	{
-		score = score + 15;
-	}
-	if(motion_energy >= 1)
-	{
-		score = score + 25;
-	}
-	if(static_energy >= 1)
-	{
-		score = score + 50;
-	}
-	if(score < 30) 		return 0;
-	else if(score <60) 	return 1;
-	else				return 2;
+	/* 1. PIR 或雷达有人: 贡献 30 分 */
+	if (pir == 1 || has_person == 1)
+		score += 30;
+	/* 2. 目标距离 < 200cm: 额外 15 分 */
+	if (motion_dist < 200)
+		score += 15;
+	/* 3. 运动能量 ≥ 1: 有运动目标, 贡献 25 分 */
+	if (motion_energy >= 1)
+		score += 25;
+	/* 4. 静止能量 ≥ 1: 有静止人体, 贡献 50 分（置信度最高） */
+	if (static_energy >= 1)
+		score += 50;
+	/* 判定: 总分 100, ≥60 确认入侵, ≥30 可疑 */
+	if      (score < 30) return 0;
+	else if (score < 60) return 1;
+	else                 return 2;
 }
 
 /**********************************************************************
@@ -115,14 +113,19 @@ static uint8_t check_intrusion(uint8_t pir, uint8_t has_person,
  ***********************************************************************/
 static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 {
-	/* TODO: 用 static 变量保存 state + counter */
-	static uint8_t state = STATE_DISARMED;
-	static uint8_t counter = 0;
+	static uint8_t state   = STATE_DISARMED;   // 当前状态
+	static uint8_t counter = 0;                 // 连续确认/安全计数
 
-	switch(state)
+	/*
+	 * 状态转换总览:
+	 *   撤防 ──(火灾≥1)──→ 预警 ──(3次确认)──→ 报警
+	 *   布防 ──(火/入侵≥1)──→ 预警 ──(连续安全)──→ 布防
+	 */
+	switch (state)
 	{
 	case STATE_DISARMED:
-		if(fire_level>=1)
+		/* 1. 撤防: 仅检测火灾, 入侵被忽略 */
+		if (fire_level >= 1)
 		{
 			state   = STATE_WARNING;
 			counter = 1;
@@ -131,25 +134,31 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 		return 0;
 		break;
 	case STATE_ARMED:
-		if(fire_level>=1 || intrusion_level>=1)
+		/* 2. 布防: 火灾或入侵任一触发即进入预警 */
+		if (fire_level >= 1 || intrusion_level >= 1)
 		{
-			state = STATE_WARNING;
+			state   = STATE_WARNING;
 			counter = 1;
 			return 1;
-		}else return 0;
+		}
+		return 0;
 		break;
 	case STATE_WARNING:
-		if(fire_level>=1 || intrusion_level>=1)
+		/* 3. 预警: 连续 3 次判定≥1 → 报警; 连续安全 → 回布防 */
+		if (fire_level >= 1 || intrusion_level >= 1)
 		{
 			counter++;
-			if(counter>=3)
+			if (counter >= 3)               // 3 次确认 → 报警
 			{
 				state = STATE_ALARM;
 				return 2;
-			}else return 1;
-		}else{
+			}
+			return 1;
+		}
+		else
+		{
 			counter--;
-			if(counter<=0)
+			if (counter <= 0)               // 连续安全 → 回布防
 			{
 				state = STATE_ARMED;
 			}
@@ -157,6 +166,7 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 		}
 		break;
 	case STATE_ALARM:
+		/* 4. 报警: 保持输出, 等撤防指令解锁 */
 		return 2;
 		break;
 	}
@@ -165,7 +175,7 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 
 /**********************************************************************
  * 函数名称： dispatch_alarm
- * 功能描述： 根据最终报警等级构建报警命令结构体,
+ * 功能描述： 根据最终报警等级 构建报警命令结构体,
  *           通过队列发送给 AlarmTask。
  *           报警命令包含：
  *           - type:  1=火灾, 2=入侵
@@ -176,10 +186,11 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
  * 输入参数： level — 报警等级
  * 返 回 值： 无
  ***********************************************************************/
-static void dispatch_alarm(uint8_t level)
+static void dispatch_alarm(uint8_t level,uint8_t type)
 {
-	/* TODO */
-
+	Security_Data.type = type;
+	Security_Data.level = level;
+	xQueueSend(g_securityQueue, &Security_Data, 0);    // 发给 AlarmTask
 }
 
 /* ==================== 任务主函数 ==================== */
@@ -200,8 +211,7 @@ void SecurityTask(void *pvParameters)
 	(void)pvParameters;
 	for (;;)
 	{
-		/* TODO: 队列接收 → check_fire → check_intrusion → 状态机 → dispatch */
-		xQueueReceive(g_sensorQueue,&Sensor_Data,portMAX_DELAY);
+		xQueueReceive(g_sensorQueue, &Sensor_Data, portMAX_DELAY); // 等队列同步过来传感器数据包
 		fire_level = check_fire(Sensor_Data.fire.smoke_ppm,
 				Sensor_Data.fire.co_ppm,
 				Sensor_Data.fire.fire_int,
@@ -211,8 +221,9 @@ void SecurityTask(void *pvParameters)
 										Sensor_Data.intrusion.motion_dist,
 										Sensor_Data.intrusion.motion_energy,
 										Sensor_Data.intrusion.static_energy);
-		state_result = run_state_machine(fire_level,intrusion_level);
-		dispatch_alarm(state_result);
+		state_result = run_state_machine(fire_level, intrusion_level); // 状态机
+		uint8_t type = (fire_level>=intrusion_level)?1:2;
+		dispatch_alarm(state_result,type);
 		vTaskDelay(pdMS_TO_TICKS(100));
 	}
 }

@@ -365,7 +365,7 @@ Discarded input sections
  .rodata.defaultTask_attributes
                 0x00000000       0x24 ./Core/Src/freertos.o
  .text.MX_FREERTOS_Init
-                0x00000000      0x108 ./Core/Src/freertos.o
+                0x00000000      0x11c ./Core/Src/freertos.o
  .text.StartDefaultTask
                 0x00000000       0x20 ./Core/Src/freertos.o
  .debug_macro   0x00000000      0xacc ./Core/Src/freertos.o
@@ -6944,15 +6944,18 @@ Discarded input sections
  .data          0x00000000        0x0 ./Task/src/task_alarm.o
  .bss           0x00000000        0x0 ./Task/src/task_alarm.o
  .text.alarm_fire
-                0x00000000        0xc ./Task/src/task_alarm.o
+                0x00000000       0x58 ./Task/src/task_alarm.o
  .text.alarm_intrusion
-                0x00000000        0xc ./Task/src/task_alarm.o
+                0x00000000       0x58 ./Task/src/task_alarm.o
  .text.alarm_idle
-                0x00000000        0xc ./Task/src/task_alarm.o
+                0x00000000       0x10 ./Task/src/task_alarm.o
  .text.AlarmTask
-                0x00000000       0x1e ./Task/src/task_alarm.o
- .debug_info    0x00000000      0x146 ./Task/src/task_alarm.o
- .debug_abbrev  0x00000000       0xd9 ./Task/src/task_alarm.o
+                0x00000000       0x5c ./Task/src/task_alarm.o
+ .bss.step.2    0x00000000        0x1 ./Task/src/task_alarm.o
+ .bss.step.1    0x00000000        0x1 ./Task/src/task_alarm.o
+ .bss.mode.0    0x00000000        0x1 ./Task/src/task_alarm.o
+ .debug_info    0x00000000      0x23d ./Task/src/task_alarm.o
+ .debug_abbrev  0x00000000      0x172 ./Task/src/task_alarm.o
  .debug_aranges
                 0x00000000       0x38 ./Task/src/task_alarm.o
  .debug_rnglists
@@ -7026,8 +7029,8 @@ Discarded input sections
  .debug_macro   0x00000000       0x10 ./Task/src/task_alarm.o
  .debug_macro   0x00000000       0x4c ./Task/src/task_alarm.o
  .debug_macro   0x00000000       0x2e ./Task/src/task_alarm.o
- .debug_line    0x00000000      0xbc5 ./Task/src/task_alarm.o
- .debug_str     0x00000000    0x92c2b ./Task/src/task_alarm.o
+ .debug_line    0x00000000      0xc53 ./Task/src/task_alarm.o
+ .debug_str     0x00000000    0x92cd4 ./Task/src/task_alarm.o
  .comment       0x00000000       0x44 ./Task/src/task_alarm.o
  .debug_frame   0x00000000       0x84 ./Task/src/task_alarm.o
  .ARM.attributes
@@ -7096,10 +7099,10 @@ Discarded input sections
                 0x00000000        0x4 ./Task/src/task_config.o
  .bss.g_sensorQueue
                 0x00000000        0x4 ./Task/src/task_config.o
- .bss.Sensor_Data
-                0x00000000       0x1c ./Task/src/task_config.o
- .debug_info    0x00000000      0x27f ./Task/src/task_config.o
- .debug_abbrev  0x00000000       0xa2 ./Task/src/task_config.o
+ .bss.g_securityQueue
+                0x00000000        0x4 ./Task/src/task_config.o
+ .debug_info    0x00000000      0x16a ./Task/src/task_config.o
+ .debug_abbrev  0x00000000       0x6e ./Task/src/task_config.o
  .debug_aranges
                 0x00000000       0x18 ./Task/src/task_config.o
  .debug_macro   0x00000000      0x19d ./Task/src/task_config.o
@@ -7136,7 +7139,7 @@ Discarded input sections
  .debug_macro   0x00000000       0xaa ./Task/src/task_config.o
  .debug_macro   0x00000000       0x87 ./Task/src/task_config.o
  .debug_line    0x00000000      0x7b7 ./Task/src/task_config.o
- .debug_str     0x00000000     0xb88c ./Task/src/task_config.o
+ .debug_str     0x00000000     0xb7b7 ./Task/src/task_config.o
  .comment       0x00000000       0x44 ./Task/src/task_config.o
  .ARM.attributes
                 0x00000000       0x2d ./Task/src/task_config.o
@@ -7369,6 +7372,8 @@ Discarded input sections
                 0x00000000        0x1 ./Task/src/task_security.o
  .bss.state_result
                 0x00000000        0x1 ./Task/src/task_security.o
+ .bss.Security_Data
+                0x00000000        0x8 ./Task/src/task_security.o
  .text.check_fire
                 0x00000000       0xb4 ./Task/src/task_security.o
  .text.check_intrusion
@@ -7376,14 +7381,14 @@ Discarded input sections
  .text.run_state_machine
                 0x00000000       0xd0 ./Task/src/task_security.o
  .text.dispatch_alarm
-                0x00000000       0x14 ./Task/src/task_security.o
+                0x00000000       0x3c ./Task/src/task_security.o
  .text.SecurityTask
-                0x00000000       0x98 ./Task/src/task_security.o
+                0x00000000       0xb0 ./Task/src/task_security.o
  .bss.state.1   0x00000000        0x1 ./Task/src/task_security.o
  .bss.counter.0
                 0x00000000        0x1 ./Task/src/task_security.o
- .debug_info    0x00000000      0x3d8 ./Task/src/task_security.o
- .debug_abbrev  0x00000000      0x1a3 ./Task/src/task_security.o
+ .debug_info    0x00000000      0x47f ./Task/src/task_security.o
+ .debug_abbrev  0x00000000      0x1c3 ./Task/src/task_security.o
  .debug_aranges
                 0x00000000       0x40 ./Task/src/task_security.o
  .debug_rnglists
@@ -7421,8 +7426,8 @@ Discarded input sections
  .debug_macro   0x00000000       0xb5 ./Task/src/task_security.o
  .debug_macro   0x00000000       0xaa ./Task/src/task_security.o
  .debug_macro   0x00000000       0x87 ./Task/src/task_security.o
- .debug_line    0x00000000      0x912 ./Task/src/task_security.o
- .debug_str     0x00000000     0xb914 ./Task/src/task_security.o
+ .debug_line    0x00000000      0x92e ./Task/src/task_security.o
+ .debug_str     0x00000000     0xb952 ./Task/src/task_security.o
  .comment       0x00000000       0x44 ./Task/src/task_security.o
  .debug_frame   0x00000000       0xc4 ./Task/src/task_security.o
  .ARM.attributes
@@ -7520,6 +7525,8 @@ Discarded input sections
                 0x00000000        0x2 ./Task/src/task_sensor.o
  .bss.static_dist
                 0x00000000        0x2 ./Task/src/task_sensor.o
+ .bss.Sensor_Data
+                0x00000000       0x1c ./Task/src/task_sensor.o
  .text.read_adc_sensors
                 0x00000000       0x4c ./Task/src/task_sensor.o
  .text.read_binary_sensors
@@ -7529,7 +7536,7 @@ Discarded input sections
  .text.read_radar_data
                 0x00000000       0x48 ./Task/src/task_sensor.o
  .text.publish_sensor_data
-                0x00000000       0xa8 ./Task/src/task_sensor.o
+                0x00000000       0xa4 ./Task/src/task_sensor.o
  .text.SensorTask
                 0x00000000       0xa4 ./Task/src/task_sensor.o
  .bss.tick.2    0x00000000        0x2 ./Task/src/task_sensor.o
@@ -7537,8 +7544,8 @@ Discarded input sections
                 0x00000000        0x4 ./Task/src/task_sensor.o
  .bss.last_hum.0
                 0x00000000        0x4 ./Task/src/task_sensor.o
- .debug_info    0x00000000      0x658 ./Task/src/task_sensor.o
- .debug_abbrev  0x00000000      0x1c3 ./Task/src/task_sensor.o
+ .debug_info    0x00000000      0x65f ./Task/src/task_sensor.o
+ .debug_abbrev  0x00000000      0x1d2 ./Task/src/task_sensor.o
  .debug_aranges
                 0x00000000       0x48 ./Task/src/task_sensor.o
  .debug_rnglists
@@ -7615,7 +7622,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x1c ./Task/src/task_sensor.o
  .debug_macro   0x00000000       0x22 ./Task/src/task_sensor.o
  .debug_macro   0x00000000       0x10 ./Task/src/task_sensor.o
- .debug_line    0x00000000      0xcb9 ./Task/src/task_sensor.o
+ .debug_line    0x00000000      0xcb6 ./Task/src/task_sensor.o
  .debug_str     0x00000000    0x93342 ./Task/src/task_sensor.o
  .comment       0x00000000       0x44 ./Task/src/task_sensor.o
  .debug_frame   0x00000000       0xec ./Task/src/task_sensor.o
@@ -9711,43 +9718,43 @@ LOAD D:/STM32CubeIDE/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.id
 LOAD D:/STM32CubeIDE/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.win32_1.0.100.202602081740/tools/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libm.a
 LOAD D:/STM32CubeIDE/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.win32_1.0.100.202602081740/tools/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp\libgcc.a
 
-.debug_info     0x00000000    0x1c520
+.debug_info     0x00000000    0x1c52b
  .debug_info    0x00000000      0x7fc ./Core/Src/adc.o
  .debug_info    0x000007fc      0x2cf ./Core/Src/dma.o
- .debug_info    0x00000acb      0x600 ./Core/Src/freertos.o
- .debug_info    0x000010cb      0x2d3 ./Core/Src/gpio.o
- .debug_info    0x0000139e      0x879 ./Core/Src/i2c.o
- .debug_info    0x00001c17      0xc60 ./Core/Src/main.o
- .debug_info    0x00002877      0x3ea ./Core/Src/rtc.o
- .debug_info    0x00002c61      0x361 ./Core/Src/stm32f1xx_hal_msp.o
- .debug_info    0x00002fc2      0x9a8 ./Core/Src/stm32f1xx_hal_timebase_tim.o
- .debug_info    0x0000396a      0x9e5 ./Core/Src/stm32f1xx_it.o
- .debug_info    0x0000434f      0x6a3 ./Core/Src/syscalls.o
- .debug_info    0x000049f2      0x168 ./Core/Src/sysmem.o
- .debug_info    0x00004b5a      0x222 ./Core/Src/system_stm32f1xx.o
- .debug_info    0x00004d7c      0xa1a ./Core/Src/tim.o
- .debug_info    0x00005796      0xa2b ./Core/Src/usart.o
- .debug_info    0x000061c1       0x30 ./Core/Startup/startup_stm32f103c8tx.o
- .debug_info    0x000061f1      0x704 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
- .debug_info    0x000068f5      0xc50 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
- .debug_info    0x00007545      0xa87 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
- .debug_info    0x00007fcc      0x6d2 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o
- .debug_info    0x0000869e      0x5ab ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
- .debug_info    0x00008c49     0x2524 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.o
- .debug_info    0x0000b16d      0x628 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o
- .debug_info    0x0000b795      0x7d5 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
- .debug_info    0x0000bf6a      0x3c0 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
- .debug_info    0x0000c32a      0xc73 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc.o
- .debug_info    0x0000cf9d     0x2959 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o
- .debug_info    0x0000f8f6     0x149b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o
- .debug_info    0x00010d91     0x2eed ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
- .debug_info    0x00013c7e      0x10c ./Lib/src/mq7.o
- .debug_info    0x00013d8a      0xf5c ./Lib/src/oled.o
- .debug_info    0x00014ce6      0x78a ./Lib/src/radar.o
- .debug_info    0x00015470     0x4094 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_info    0x00019504      0x2af ./Middlewares/Third_Party/FreeRTOS/Source/list.o
- .debug_info    0x000197b3     0x28d9 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_info    0x0001c08c      0x494 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3/port.o
+ .debug_info    0x00000acb      0x60b ./Core/Src/freertos.o
+ .debug_info    0x000010d6      0x2d3 ./Core/Src/gpio.o
+ .debug_info    0x000013a9      0x879 ./Core/Src/i2c.o
+ .debug_info    0x00001c22      0xc60 ./Core/Src/main.o
+ .debug_info    0x00002882      0x3ea ./Core/Src/rtc.o
+ .debug_info    0x00002c6c      0x361 ./Core/Src/stm32f1xx_hal_msp.o
+ .debug_info    0x00002fcd      0x9a8 ./Core/Src/stm32f1xx_hal_timebase_tim.o
+ .debug_info    0x00003975      0x9e5 ./Core/Src/stm32f1xx_it.o
+ .debug_info    0x0000435a      0x6a3 ./Core/Src/syscalls.o
+ .debug_info    0x000049fd      0x168 ./Core/Src/sysmem.o
+ .debug_info    0x00004b65      0x222 ./Core/Src/system_stm32f1xx.o
+ .debug_info    0x00004d87      0xa1a ./Core/Src/tim.o
+ .debug_info    0x000057a1      0xa2b ./Core/Src/usart.o
+ .debug_info    0x000061cc       0x30 ./Core/Startup/startup_stm32f103c8tx.o
+ .debug_info    0x000061fc      0x704 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
+ .debug_info    0x00006900      0xc50 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
+ .debug_info    0x00007550      0xa87 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
+ .debug_info    0x00007fd7      0x6d2 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o
+ .debug_info    0x000086a9      0x5ab ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
+ .debug_info    0x00008c54     0x2524 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.o
+ .debug_info    0x0000b178      0x628 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o
+ .debug_info    0x0000b7a0      0x7d5 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
+ .debug_info    0x0000bf75      0x3c0 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
+ .debug_info    0x0000c335      0xc73 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc.o
+ .debug_info    0x0000cfa8     0x2959 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o
+ .debug_info    0x0000f901     0x149b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o
+ .debug_info    0x00010d9c     0x2eed ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
+ .debug_info    0x00013c89      0x10c ./Lib/src/mq7.o
+ .debug_info    0x00013d95      0xf5c ./Lib/src/oled.o
+ .debug_info    0x00014cf1      0x78a ./Lib/src/radar.o
+ .debug_info    0x0001547b     0x4094 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_info    0x0001950f      0x2af ./Middlewares/Third_Party/FreeRTOS/Source/list.o
+ .debug_info    0x000197be     0x28d9 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_info    0x0001c097      0x494 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3/port.o
 
 .debug_abbrev   0x00000000     0x48ea
  .debug_abbrev  0x00000000      0x1f2 ./Core/Src/adc.o
@@ -10090,82 +10097,82 @@ LOAD D:/STM32CubeIDE/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.id
  .debug_macro   0x0001d3bf       0x10 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
  .debug_macro   0x0001d3cf      0x222 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3/port.o
 
-.debug_line     0x00000000    0x21d10
+.debug_line     0x00000000    0x21d1a
  .debug_line    0x00000000      0x836 ./Core/Src/adc.o
  .debug_line    0x00000836      0x771 ./Core/Src/dma.o
- .debug_line    0x00000fa7      0xbb1 ./Core/Src/freertos.o
- .debug_line    0x00001b58      0x7e5 ./Core/Src/gpio.o
- .debug_line    0x0000233d      0x7dc ./Core/Src/i2c.o
- .debug_line    0x00002b19      0xc90 ./Core/Src/main.o
- .debug_line    0x000037a9      0x7b9 ./Core/Src/rtc.o
- .debug_line    0x00003f62      0x773 ./Core/Src/stm32f1xx_hal_msp.o
- .debug_line    0x000046d5      0x7f0 ./Core/Src/stm32f1xx_hal_timebase_tim.o
- .debug_line    0x00004ec5      0x8ba ./Core/Src/stm32f1xx_it.o
- .debug_line    0x0000577f      0x99f ./Core/Src/syscalls.o
- .debug_line    0x0000611e      0x67b ./Core/Src/sysmem.o
- .debug_line    0x00006799      0x7f0 ./Core/Src/system_stm32f1xx.o
- .debug_line    0x00006f89      0x86b ./Core/Src/tim.o
- .debug_line    0x000077f4      0x927 ./Core/Src/usart.o
- .debug_line    0x0000811b       0x78 ./Core/Startup/startup_stm32f103c8tx.o
- .debug_line    0x00008193      0xa24 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
- .debug_line    0x00008bb7     0x1046 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
- .debug_line    0x00009bfd      0xbeb ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
- .debug_line    0x0000a7e8      0xe2b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o
- .debug_line    0x0000b613      0xa7b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
- .debug_line    0x0000c08e     0x3c1e ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.o
- .debug_line    0x0000fcac      0x9c5 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o
- .debug_line    0x00010671      0xeda ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
- .debug_line    0x0001154b      0x98b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
- .debug_line    0x00011ed6     0x1230 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc.o
- .debug_line    0x00013106     0x3515 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o
- .debug_line    0x0001661b     0x18e5 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o
- .debug_line    0x00017f00     0x253d ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
- .debug_line    0x0001a43d      0x6ba ./Lib/src/mq7.o
- .debug_line    0x0001aaf7     0x1023 ./Lib/src/oled.o
- .debug_line    0x0001bb1a      0xaed ./Lib/src/radar.o
- .debug_line    0x0001c607     0x266e ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_line    0x0001ec75      0x889 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
- .debug_line    0x0001f4fe     0x1e2e ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_line    0x0002132c      0x9e4 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3/port.o
+ .debug_line    0x00000fa7      0xbbb ./Core/Src/freertos.o
+ .debug_line    0x00001b62      0x7e5 ./Core/Src/gpio.o
+ .debug_line    0x00002347      0x7dc ./Core/Src/i2c.o
+ .debug_line    0x00002b23      0xc90 ./Core/Src/main.o
+ .debug_line    0x000037b3      0x7b9 ./Core/Src/rtc.o
+ .debug_line    0x00003f6c      0x773 ./Core/Src/stm32f1xx_hal_msp.o
+ .debug_line    0x000046df      0x7f0 ./Core/Src/stm32f1xx_hal_timebase_tim.o
+ .debug_line    0x00004ecf      0x8ba ./Core/Src/stm32f1xx_it.o
+ .debug_line    0x00005789      0x99f ./Core/Src/syscalls.o
+ .debug_line    0x00006128      0x67b ./Core/Src/sysmem.o
+ .debug_line    0x000067a3      0x7f0 ./Core/Src/system_stm32f1xx.o
+ .debug_line    0x00006f93      0x86b ./Core/Src/tim.o
+ .debug_line    0x000077fe      0x927 ./Core/Src/usart.o
+ .debug_line    0x00008125       0x78 ./Core/Startup/startup_stm32f103c8tx.o
+ .debug_line    0x0000819d      0xa24 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
+ .debug_line    0x00008bc1     0x1046 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
+ .debug_line    0x00009c07      0xbeb ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
+ .debug_line    0x0000a7f2      0xe2b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o
+ .debug_line    0x0000b61d      0xa7b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
+ .debug_line    0x0000c098     0x3c1e ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.o
+ .debug_line    0x0000fcb6      0x9c5 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o
+ .debug_line    0x0001067b      0xeda ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
+ .debug_line    0x00011555      0x98b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
+ .debug_line    0x00011ee0     0x1230 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc.o
+ .debug_line    0x00013110     0x3515 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o
+ .debug_line    0x00016625     0x18e5 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o
+ .debug_line    0x00017f0a     0x253d ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
+ .debug_line    0x0001a447      0x6ba ./Lib/src/mq7.o
+ .debug_line    0x0001ab01     0x1023 ./Lib/src/oled.o
+ .debug_line    0x0001bb24      0xaed ./Lib/src/radar.o
+ .debug_line    0x0001c611     0x266e ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_line    0x0001ec7f      0x889 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
+ .debug_line    0x0001f508     0x1e2e ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_line    0x00021336      0x9e4 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3/port.o
 
-.debug_str      0x00000000    0xa0e96
- .debug_str     0x00000000    0xa0e96 ./Core/Src/adc.o
+.debug_str      0x00000000    0xa0ea6
+ .debug_str     0x00000000    0xa0ea6 ./Core/Src/adc.o
                               0x8bdf4 (size before relaxing)
- .debug_str     0x000a0e96    0x8bc87 ./Core/Src/dma.o
- .debug_str     0x000a0e96    0x941c8 ./Core/Src/freertos.o
- .debug_str     0x000a0e96    0x8ba29 ./Core/Src/gpio.o
- .debug_str     0x000a0e96    0x8bf11 ./Core/Src/i2c.o
- .debug_str     0x000a0e96    0x9433d ./Core/Src/main.o
- .debug_str     0x000a0e96    0x8bb97 ./Core/Src/rtc.o
- .debug_str     0x000a0e96    0x8bca5 ./Core/Src/stm32f1xx_hal_msp.o
- .debug_str     0x000a0e96    0x8bd83 ./Core/Src/stm32f1xx_hal_timebase_tim.o
- .debug_str     0x000a0e96    0x8c1b4 ./Core/Src/stm32f1xx_it.o
- .debug_str     0x000a0e96     0x9922 ./Core/Src/syscalls.o
- .debug_str     0x000a0e96     0x76cc ./Core/Src/sysmem.o
- .debug_str     0x000a0e96    0x8b4bb ./Core/Src/system_stm32f1xx.o
- .debug_str     0x000a0e96    0x8c2e5 ./Core/Src/tim.o
- .debug_str     0x000a0e96    0x8c1fc ./Core/Src/usart.o
- .debug_str     0x000a0e96       0x9c ./Core/Startup/startup_stm32f103c8tx.o
- .debug_str     0x000a0e96    0x8bbee ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
- .debug_str     0x000a0e96    0x8bb9f ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
- .debug_str     0x000a0e96    0x8bb3a ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
- .debug_str     0x000a0e96    0x8b864 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o
- .debug_str     0x000a0e96    0x8b841 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
- .debug_str     0x000a0e96    0x8c582 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.o
- .debug_str     0x000a0e96    0x8b9f2 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o
- .debug_str     0x000a0e96    0x8b8ea ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
- .debug_str     0x000a0e96    0x8b63a ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
- .debug_str     0x000a0e96    0x8b9c6 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc.o
- .debug_str     0x000a0e96    0x8c8ec ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o
- .debug_str     0x000a0e96    0x8c0f8 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o
- .debug_str     0x000a0e96    0x8bf5b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
- .debug_str     0x000a0e96     0x7a19 ./Lib/src/mq7.o
- .debug_str     0x000a0e96    0x8f0a7 ./Lib/src/oled.o
- .debug_str     0x000a0e96    0x8f10f ./Lib/src/radar.o
- .debug_str     0x000a0e96    0x96396 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_str     0x000a0e96     0xaac9 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
- .debug_str     0x000a0e96     0xd4c7 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_str     0x000a0e96     0xb6f2 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3/port.o
+ .debug_str     0x000a0ea6    0x8bc87 ./Core/Src/dma.o
+ .debug_str     0x000a0ea6    0x941d8 ./Core/Src/freertos.o
+ .debug_str     0x000a0ea6    0x8ba29 ./Core/Src/gpio.o
+ .debug_str     0x000a0ea6    0x8bf11 ./Core/Src/i2c.o
+ .debug_str     0x000a0ea6    0x9433d ./Core/Src/main.o
+ .debug_str     0x000a0ea6    0x8bb97 ./Core/Src/rtc.o
+ .debug_str     0x000a0ea6    0x8bca5 ./Core/Src/stm32f1xx_hal_msp.o
+ .debug_str     0x000a0ea6    0x8bd83 ./Core/Src/stm32f1xx_hal_timebase_tim.o
+ .debug_str     0x000a0ea6    0x8c1b4 ./Core/Src/stm32f1xx_it.o
+ .debug_str     0x000a0ea6     0x9922 ./Core/Src/syscalls.o
+ .debug_str     0x000a0ea6     0x76cc ./Core/Src/sysmem.o
+ .debug_str     0x000a0ea6    0x8b4bb ./Core/Src/system_stm32f1xx.o
+ .debug_str     0x000a0ea6    0x8c2e5 ./Core/Src/tim.o
+ .debug_str     0x000a0ea6    0x8c1fc ./Core/Src/usart.o
+ .debug_str     0x000a0ea6       0x9c ./Core/Startup/startup_stm32f103c8tx.o
+ .debug_str     0x000a0ea6    0x8bbee ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
+ .debug_str     0x000a0ea6    0x8bb9f ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.o
+ .debug_str     0x000a0ea6    0x8bb3a ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
+ .debug_str     0x000a0ea6    0x8b864 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o
+ .debug_str     0x000a0ea6    0x8b841 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
+ .debug_str     0x000a0ea6    0x8c582 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.o
+ .debug_str     0x000a0ea6    0x8b9f2 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o
+ .debug_str     0x000a0ea6    0x8b8ea ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
+ .debug_str     0x000a0ea6    0x8b63a ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o
+ .debug_str     0x000a0ea6    0x8b9c6 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc.o
+ .debug_str     0x000a0ea6    0x8c8ec ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o
+ .debug_str     0x000a0ea6    0x8c0f8 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o
+ .debug_str     0x000a0ea6    0x8bf5b ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
+ .debug_str     0x000a0ea6     0x7a19 ./Lib/src/mq7.o
+ .debug_str     0x000a0ea6    0x8f0a7 ./Lib/src/oled.o
+ .debug_str     0x000a0ea6    0x8f10f ./Lib/src/radar.o
+ .debug_str     0x000a0ea6    0x96396 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_str     0x000a0ea6     0xaac9 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
+ .debug_str     0x000a0ea6     0xd4c7 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_str     0x000a0ea6     0xb6f2 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3/port.o
 
 .comment        0x00000000       0x43
  .comment       0x00000000       0x43 ./Core/Src/adc.o
