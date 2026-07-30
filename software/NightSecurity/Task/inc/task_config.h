@@ -64,4 +64,12 @@ extern TaskHandle_t g_WatchdogTaskHandle;
 extern QueueHandle_t g_sensorQueue;
 extern QueueHandle_t g_securityQueue;
 
-#endif /* __TASK_CONFIG_H */
+
+/*=====================看门狗心跳=======================*/
+extern volatile uint32_t g_heartbeat_sensor;
+extern volatile uint32_t g_heartbeat_security;
+extern volatile uint32_t g_heartbeat_alarm;
+extern volatile uint32_t g_heartbeat_ui;
+extern volatile uint32_t g_heartbeat_finger;
+
+#endif

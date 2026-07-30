@@ -211,6 +211,7 @@ void SecurityTask(void *pvParameters)
 	(void)pvParameters;
 	for (;;)
 	{
+		g_heartbeat_security++;
 		xQueueReceive(g_sensorQueue, &Sensor_Data, portMAX_DELAY); // 等队列同步过来传感器数据包
 		fire_level = check_fire(Sensor_Data.fire.smoke_ppm,
 				Sensor_Data.fire.co_ppm,

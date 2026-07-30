@@ -81,6 +81,7 @@ void FingerTask(void *pvParameters)
 
 	for (;;)
 	{
+		g_heartbeat_finger++;
 		finger_wait_touch(0);               /* 永久等待手指按下         */
 		finger_do_verify();                 /* 执行搜索 + 显示结果      */
 		vTaskDelay(pdMS_TO_TICKS(500));

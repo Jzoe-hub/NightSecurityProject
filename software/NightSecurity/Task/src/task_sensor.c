@@ -173,6 +173,7 @@ void SensorTask(void *pvParameters)
 
 	for (;;)
 	{
+		g_heartbeat_sensor++;
 		read_adc_sensors(&smoke_ppm, &co_ppm, &fire_int);
 		read_binary_sensors(&pir_triggered, &fire_do);
 		read_dht11_data(&temp, &hum);

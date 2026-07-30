@@ -184,6 +184,7 @@ void UITask(void *pvParameters)
 
 	for (;;)
 	{
+		g_heartbeat_ui++;
 		uint8_t key = ui_scan_keys();
 		ui_run_menu(key);
 		vTaskDelay(pdMS_TO_TICKS(200));

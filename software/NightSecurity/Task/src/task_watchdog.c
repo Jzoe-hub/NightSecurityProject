@@ -4,8 +4,15 @@
  *           任一任务卡死 → 不喂狗 → 系统自动复位
  ***********************************************************************/
 #include "task_config.h"
-#include "stm32f1xx_hal.h"   /* IWDG_HandleTypeDef hiwdg */
+#include "iwdg.h"
 #include <stdbool.h>
+
+/*==========看门狗心跳全局变量=============*/
+volatile uint32_t g_heartbeat_sensor;
+volatile uint32_t g_heartbeat_security;
+volatile uint32_t g_heartbeat_alarm;
+volatile uint32_t g_heartbeat_ui;
+volatile uint32_t g_heartbeat_finger;
 
 /* ==================== 看门狗子函数 ==================== */
 
@@ -31,21 +38,34 @@
 static bool wdg_check_heartbeats(void)
 {
 	/* TODO */
+	static uint32_t last_sensor,last_security,last_alarm,last_ui,last_finger=0;
+	if(g_heartbeat_sensor == last_sensor) return false;
+	if(g_heartbeat_security == last_security) return false;
+	if(g_heartbeat_alarm == last_alarm) return false;
+	if(g_heartbeat_ui == last_ui) return false;
+	if(g_heartbeat_finger == last_finger) return false;
+
+	last_sensor   	 = g_heartbeat_sensor;
+	last_security 	 = g_heartbeat_security;
+	last_alarm		 = g_heartbeat_alarm;
+	last_ui			 = g_heartbeat_ui;
+	last_finger		 = g_heartbeat_finger;
+
 	return true;
 }
 
 /**********************************************************************
  * 函数名称： wdg_feed
- * 功能描述： 调用 HAL_IWDG_Refresh() 重置独立看门狗计数器。
- *           注意：IWDG 一旦使能就无法关闭, 必须在超时前喂狗。
- *           执行流程：
- *           1. HAL_IWDG_Refresh(&hiwdg)
+ * 功能描述： 喂狗 — 重置 IWDG 倒计时。
+ *           IWDG 是硬件倒计时器, 超时则芯片自动复位。
+ *           每个周期调一次本函数, 倒计时重新从 5 秒开始数。
+ *           如果程序卡死、不再调用本函数 → 5 秒后芯片自动重启。
  * 输入参数： 无
  * 返 回 值： 无
  ***********************************************************************/
 static void wdg_feed(void)
 {
-	/* TODO */
+	HAL_IWDG_Refresh(&hiwdg);   /* 重置倒计时, 防止芯片复位 */
 }
 
 /* ==================== 任务主函数 ==================== */
@@ -67,6 +87,10 @@ void WatchdogTask(void *pvParameters)
 	for (;;)
 	{
 		/* TODO: wdg_check_heartbeats → wdg_feed */
+		if(wdg_check_heartbeats())
+		{
+			wdg_feed();
+		}
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
 	}
 }
