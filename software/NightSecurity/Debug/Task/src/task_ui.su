@@ -1,5 +1,6 @@
-../Task/src/task_ui.c:25:13:ui_show_sensors	4	static
-../Task/src/task_ui.c:40:13:ui_show_status	16	static
-../Task/src/task_ui.c:57:16:ui_scan_keys	4	static
-../Task/src/task_ui.c:82:13:ui_run_menu	16	static
-../Task/src/task_ui.c:98:6:UITask	24	static
+../Task/src/task_ui.c:29:13:ui_show_sensors	24	static
+../Task/src/task_ui.c:48:13:ui_show_alarm	16	static
+../Task/src/task_ui.c:62:13:ui_show_setting	24	static
+../Task/src/task_ui.c:90:16:ui_scan_keys	8	static
+../Task/src/task_ui.c:139:13:ui_run_menu	16	static
+../Task/src/task_ui.c:181:6:UITask	24	static

@@ -41,7 +41,8 @@ Task/src/task_finger.o: ../Task/src/task_finger.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rtc_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
+ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/oled.h
 D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Task/inc/task_config.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -85,3 +86,4 @@ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurit
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
+D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/oled.h:

@@ -1,34 +1,41 @@
 /**********************************************************************
  * 文件名称： task_finger.c
- * 功能描述： FingerTask — 指纹录入/验证/删除 (事件驱动 / Priority 2 / Stack 384)
- *           由 TOUCH 引脚事件唤醒, 执行对应指纹操作
+ * 功能描述： FingerTask — 指纹验证 (事件驱动 / Priority 2 / Stack 384)
+ *           Phase 2 仅验证, 录入功能 Phase 5 由 APP 远程实现
  ***********************************************************************/
 #include "task_config.h"
 #include "finger.h"
+#include "oled.h"
 #include <stdbool.h>
 
 /* ==================== 指纹流程子函数 ==================== */
 
 /**********************************************************************
  * 函数名称： finger_wait_touch
- * 功能描述： 轮询 Finger_IsTouched() 等待手指按下, 带超时。
- *           执行流程：
- *           1. 记录起始 tick
- *           2. 循环: 读 Finger_IsTouched()
- *           3. 若为 1 → 返回 true
- *           4. 若超时(timeout_ms 到期) → 返回 false
- *           5. 每次循环 vTaskDelay(50ms) 避免占满 CPU
+ * 功能描述： 轮询 Finger_IsTouched() 等待手指按下。
+ *           timeout_ms=0 → 永久等待, 其余值 → 每 ms 检查一次直到超时
  * 输入参数： timeout_ms — 超时时间 (ms), 0=永久等待
  * 返 回 值： true=检测到手指, false=超时
  ***********************************************************************/
 static bool finger_wait_touch(uint32_t timeout_ms)
 {
-	/* TODO */
+	if (timeout_ms == 0)                    /* 0 = 永久等待            */
+	{
+		while (!Finger_IsTouched())
+			vTaskDelay(pdMS_TO_TICKS(50));   /* 50ms 轮询, 不占满 CPU   */
+		return true;
+	}
+	for (int tick = 0; tick < timeout_ms; tick++)   /* 带超时, 1ms 精度 */
+	{
+		if (Finger_IsTouched())
+			return true;
+		vTaskDelay(pdMS_TO_TICKS(1));
+	}
 	return false;
 }
 
 /**********************************************************************
- * 函数名称： finger_do_enroll
+ * 函数名称： finger_do_enroll      (Phase 5 APP 远程录入, 当前留空)
  * 功能描述： 执行一次指纹注册, 共 5 次采图, 每次 OLED 提示进度。
  *           执行流程：
  *           1. OLED_PrintString 提示 "Place Finger"
@@ -40,40 +47,33 @@ static bool finger_wait_touch(uint32_t timeout_ms)
  ***********************************************************************/
 static bool finger_do_enroll(void)
 {
-	/* TODO */
 	return false;
 }
 
 /**********************************************************************
  * 函数名称： finger_do_verify
- * 功能描述： 执行一次指纹验证, 结果通过事件组通知 SecurityTask。
- *           执行流程：
- *           1. OLED 提示 "Verify Finger"
- *           2. finger_wait_touch(5000) — 等手指
- *           3. Finger_Search() — 搜索指纹库
- *           4. 成功 → OLED 显示 "Pass" + 事件组置位通知 SecurityTask
- *           5. 失败 → OLED 显示 "Fail"
+ * 功能描述： 执行一次指纹验证 — 等手指 → 搜索指纹库 → 显示结果
  * 输入参数： 无
  * 返 回 值： true=验证通过
  ***********************************************************************/
 static bool finger_do_verify(void)
 {
-	/* TODO */
-	return false;
+	OLED_Clear();
+	OLED_PrintString(0,0,"Verify Finger");
+
+	if(!finger_wait_touch(5000))
+		return false;
+	bool ok = Finger_Search();
+	OLED_PrintString(0,2,ok ? "Finger:Pass":"Finger:Fail");
+	return ok;
 }
 
 /* ==================== 任务主函数 ==================== */
 
 /**********************************************************************
  * 函数名称： FingerTask
- * 功能描述： 循环等待手指按下, 根据当前模式执行录入或验证。
- *           执行流程：
- *           1. finger_wait_touch(0) — 永久等待手指
- *           2. 检测到手指 → 根据全局 mode 变量决定：
- *              MODE_ENROLL → finger_do_enroll()
- *              MODE_VERIFY → finger_do_verify()
- * 输入参数： pvParameters — 未使用
- * 返 回 值： 无
+ * 功能描述： 循环: 等手指 → 执行验证 → 延时 500ms, 周而复始
+ *           录入功能 Phase 5 由 APP 远程实现, 届时加模式判断
  ***********************************************************************/
 void FingerTask(void *pvParameters)
 {
@@ -81,7 +81,8 @@ void FingerTask(void *pvParameters)
 
 	for (;;)
 	{
-		/* TODO: 等手指 → 根据模式执行操作 */
+		finger_wait_touch(0);               /* 永久等待手指按下         */
+		finger_do_verify();                 /* 执行搜索 + 显示结果      */
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }

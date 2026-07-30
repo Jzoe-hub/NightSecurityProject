@@ -41,6 +41,7 @@ typedef struct{
 
 extern SensorPacket Sensor_Data;
 extern AlarmCMD Security_Data;
+extern uint8_t state_result;
 
 /*==================任务函数和任务句柄======================*/
 void SensorTask(void *pvParameters);
