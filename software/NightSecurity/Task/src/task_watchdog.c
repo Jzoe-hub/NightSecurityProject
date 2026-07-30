@@ -38,18 +38,19 @@ volatile uint32_t g_heartbeat_finger;
 static bool wdg_check_heartbeats(void)
 {
 	/* TODO */
-	static uint32_t last_sensor,last_security,last_alarm,last_ui,last_finger=0;
-	if(g_heartbeat_sensor == last_sensor) return false;
-	if(g_heartbeat_security == last_security) return false;
-	if(g_heartbeat_alarm == last_alarm) return false;
-	if(g_heartbeat_ui == last_ui) return false;
-	if(g_heartbeat_finger == last_finger) return false;
+	static uint32_t last_sensor, last_security, last_alarm, last_ui;
+	//static uint32_t last_finger;                                  /* 等 FingerTask 启用后恢复 */
+	if (g_heartbeat_sensor   == last_sensor)   return false;
+	if (g_heartbeat_security == last_security) return false;
+	if (g_heartbeat_alarm    == last_alarm)    return false;
+	if (g_heartbeat_ui       == last_ui)       return false;
+	//if (g_heartbeat_finger == last_finger) return false;        /* 等 FingerTask 启用后恢复 */
 
-	last_sensor   	 = g_heartbeat_sensor;
-	last_security 	 = g_heartbeat_security;
-	last_alarm		 = g_heartbeat_alarm;
-	last_ui			 = g_heartbeat_ui;
-	last_finger		 = g_heartbeat_finger;
+	last_sensor   = g_heartbeat_sensor;
+	last_security = g_heartbeat_security;
+	last_alarm    = g_heartbeat_alarm;
+	last_ui       = g_heartbeat_ui;
+	//last_finger  = g_heartbeat_finger;                          /* 等 FingerTask 启用后恢复 */
 
 	return true;
 }

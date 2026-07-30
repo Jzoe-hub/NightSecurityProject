@@ -11,13 +11,16 @@
 /* ==================== 内部状态变量 ==================== */
 static uint8_t cur_page   = 0;      /* 0=监控页, 1=设置页          */
 static uint8_t need_clear = 1;      /* 页面切换标记, 1=需要清屏    */
-static uint8_t sw_armed   = 0;      /* 0=撤防, 1=布防              */
+/* g_sw_armed 已改为全局变量 g_sw_armed, 定义在 task_config.c */
 static uint8_t cursor     = 0;      /* 设置页光标位置              */
+static uint8_t adj_dir    = 0;      /* 0=上调(+) 1=下调(-)        */
 
 /* ---- 阈值 (默认值, 可在设置页调节) ---- */
-static uint16_t th_fire  = 2000;
-static uint8_t  th_smoke = 10;
-static uint8_t  th_co    = 10;
+uint16_t th_fire  = 2000;   /* 火焰强度 — SecurityTask 共用  */
+uint8_t  th_smoke = 10;     /* 烟雾 ppm  — SecurityTask 共用  */
+uint8_t  th_co    = 10;     /* CO ppm    — SecurityTask 共用  */
+uint8_t  th_temp  = 45;     /* 温度 ℃   — SecurityTask 共用  */
+uint8_t  th_pir   = 1;      /* PIR 触发  — SecurityTask 共用  */
 
 /* ==================== 显示子函数 ==================== */
 
@@ -29,12 +32,17 @@ static uint8_t  th_co    = 10;
 static void ui_show_sensors(void)
 {
 	char buf[16];
-	OLED_PrintString(0, 0, "SENSOR DATA");
-	sprintf(buf, "MQ2:%.1f PPM", Sensor_Data.fire.smoke_ppm);
+	OLED_Clear();
+	OLED_PrintString(0, 0, "- SAFETY MON -");                /* 15 字符 */
+	sprintf(buf, "ARM:%s", g_sw_armed ? "ON " : "OFF");        /* 安防开关 */
 	OLED_PrintString(0, 2, buf);
-	sprintf(buf, "CO:%.1f PPM", Sensor_Data.fire.co_ppm);
+	sprintf(buf, "T:%dC S:%d G:%d", Sensor_Data.fire.temp,   /* 温/烟/气 */
+	        (int)Sensor_Data.fire.smoke_ppm, (int)Sensor_Data.fire.co_ppm);
 	OLED_PrintString(0, 4, buf);
-	sprintf(buf, "T:%dC H:%d%%", Sensor_Data.fire.temp, Sensor_Data.fire.hum);
+	sprintf(buf, "F:%d P:%d R:%d",                            /* 火/PIR/雷达 */
+	        (int)Sensor_Data.fire.fire_int,
+	        Sensor_Data.intrusion.pir_triggered,
+	        Sensor_Data.intrusion.has_person);
 	OLED_PrintString(0, 6, buf);
 }
 
@@ -47,10 +55,13 @@ static void ui_show_sensors(void)
  ***********************************************************************/
 static void ui_show_alarm(uint8_t type, uint8_t level)
 {
-	OLED_PrintString(0, 0, "!! WARNING !!");
-	OLED_PrintString(0, 1, (type == 1) ? "TYPE: FIRE" : "TYPE: INTR");
-	OLED_PrintString(0, 2, (level == 1) ? "LEV: WARN" : "LEV: ALARM");
-	OLED_PrintString(0, 3, "KEY1: STOP ALARM");
+	char buf[16];
+	OLED_Clear();
+	OLED_PrintString(0, 0, "- WARNING -");                  /* 12 字符 */
+	OLED_PrintString(0, 2, (type == 1) ? "TYPE: FIRE" : "TYPE: ENEMY");
+	sprintf(buf, "LV:%s", (level == 1) ? "WARN" : "ALARM"); /* 报警等级 */
+	OLED_PrintString(0, 4, buf);
+	OLED_PrintString(0, 6, "FP UNLCK K1:EXIT");             /* 16 字符, 刚好 */
 }
 
 /**********************************************************************
@@ -61,15 +72,17 @@ static void ui_show_alarm(uint8_t type, uint8_t level)
  ***********************************************************************/
 static void ui_show_setting(void)
 {
-	/* TODO */
 	char buf[16];
-	OLED_PrintString(0, 0, "SETTING");
-	sprintf(buf, "%sF-Lim: %d",  (cursor == 0) ? ">" : " ", th_fire);
+	OLED_Clear();
+	OLED_PrintString(0, 0, "-SETTING-");
+	sprintf(buf, "[%s]%s", adj_dir ? "-" : "+", (cursor == 5) ? "<" : " ");
+	OLED_PrintString(10, 0, buf);
+	sprintf(buf, "%sF:%d %sT:%dC", (cursor==0)?">":" ", th_fire, (cursor==1)?">":" ", th_temp);
 	OLED_PrintString(0, 2, buf);
-	sprintf(buf, "%sS-Lim: %d",  (cursor == 1) ? ">" : " ", th_smoke);
+	sprintf(buf, "%sS:%d %sG:%d", (cursor==2)?">":" ", th_smoke, (cursor==3)?">":" ", th_co);
 	OLED_PrintString(0, 4, buf);
-	sprintf(buf, "%sCO-Lim: %d", (cursor == 2) ? ">" : " ", th_co);
-	OLED_PrintString(0, 6,buf);
+	sprintf(buf, "%sPIR:%d", (cursor==4)?">":" ", th_pir);
+	OLED_PrintString(0, 6, buf);
 }
 
 /* ==================== 按键子函数 ==================== */
@@ -120,12 +133,12 @@ static uint8_t ui_scan_keys(void)
  * 功能描述： 三段式调度 — 报警优先 → 按键处理 → 绘图刷新。
  *           执行流程:
  *           A. 报警判断: state_result > 0 则霸屏显示报警页,
- *              KEY1 可退出报警 (sw_armed=0, cur_page=0, need_clear=1)。
+ *              KEY1 可退出报警 (g_sw_armed=0, cur_page=0, need_clear=1)。
  *              注意: return 跳过后续, 报警期间不响应 KEY2/KEY3。
  *           B. 按键处理 (同一按键在不同页面作用不同):
  *              KEY1 (翻页):           cur_page = !cur_page, need_clear = 1
  *              KEY2:
- *                监控页:              sw_armed = !sw_armed (布防/撤防)
+ *                监控页:              g_sw_armed = !g_sw_armed (布防/撤防)
  *                设置页:              光标下移 cursor++, 到头回绕
  *              KEY3:
  *                监控页:              无操作
@@ -138,40 +151,47 @@ static uint8_t ui_scan_keys(void)
  ***********************************************************************/
 static void ui_run_menu(uint8_t key_event)
 {
-	/* TODO */
-	if(state_result>0)
+	/* 报警优先: 有报警则霸屏 */
+	if (state_result > 0)
 	{
-		 ui_show_alarm(Security_Data.type,Security_Data.level);
-		 return;
-	}else if(key_event == 1)
+		ui_show_alarm(Security_Data.type, Security_Data.level);
+		if (key_event == 1)             /* KEY1: 撤防 → 解除报警 */
+				g_sw_armed = 0;
+		return;
+	}
+	if (key_event == 1)              /* KEY1: 翻页 */
 	{
 		cur_page = !cur_page;
 		need_clear = 1;
-	}else if(cur_page==0&&key_event==2)
+	}
+	else if (cur_page == 0 && key_event == 2)    /* 监控页: 布防/撤防 */
 	{
-		sw_armed = !sw_armed;
-	}else if(cur_page==1&&key_event==2)
+		g_sw_armed = !g_sw_armed;
+	}
+	else if (cur_page == 1 && key_event == 2)    /* 设置页: 光标下移 */
 	{
 		cursor++;
-		if (cursor > 2) cursor = 0;    // 3 个选项, 到头循环
-	}else if(cur_page==1&&key_event==3)
-	{
-		if(cursor==0)th_fire++;
-		if(cursor==1)th_smoke++;
-		if(cursor==2)th_co++;
+		if (cursor > 5) cursor = 0;            /* 0=F 1=T 2=S 3=G 4=P 5=Dir */
 	}
-	if(need_clear == 1)
+	else if (cur_page == 1 && key_event == 3)    /* 设置页: 调值/切方向 */
 	{
-		OLED_Clear();
-		need_clear = 0;
+		if (cursor == 5)                       /* 光标在方向位..翻方向 */
+			adj_dir = !adj_dir;
+		else
+		{
+			int step = adj_dir ? -1 : 1;       /* 0=加 1=减 */
+			if (cursor == 0) th_fire  += step;
+			if (cursor == 1) th_temp  += step;
+			if (cursor == 2) th_smoke += step;
+			if (cursor == 3) th_co    += step;
+			if (cursor == 4) th_pir   += step;
+		}
 	}
 	if (cur_page == 0)
-	{
 		ui_show_sensors();
-	}
-	else ui_show_setting();
+	else
+		ui_show_setting();
 }
-
 /* ==================== 任务主函数 ==================== */
 
 /**********************************************************************

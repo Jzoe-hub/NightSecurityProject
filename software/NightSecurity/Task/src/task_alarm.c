@@ -126,8 +126,13 @@ void AlarmTask(void *pvParameters)
 	{
 		/* 1. 非阻塞收队列, 有新命令则切换模式 */
 		g_heartbeat_alarm++;
-		if (xQueueReceive(g_securityQueue, &Security_Data, 0) == pdPASS)
-			mode = Security_Data.type;      /* 1=火灾 2=入侵 */
+	if (!g_sw_armed)
+	{
+		mode = 0;                              /* 撤防时强制静默 */
+		xQueueReceive(g_securityQueue, &Security_Data, 0);  /* 丢弃旧命令 */
+	}
+	else if (xQueueReceive(g_securityQueue, &Security_Data, 0) == pdPASS)
+		mode = Security_Data.type;             /* 1=火灾 2=入侵 */
 		/* 2. 根据当前模式执行对应报警时序 */
 		if (mode == 1)
 			alarm_fire();

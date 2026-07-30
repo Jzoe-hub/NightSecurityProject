@@ -114,7 +114,7 @@ void MX_FREERTOS_Init(void) {
 	xTaskCreate(SecurityTask,"Security",512,NULL,4,&g_SecurityTaskHandle);//对传感器数据融合处理
 	xTaskCreate(AlarmTask,"Alarm",256,NULL,5,&g_AlarmTaskHandle);//由处理后的数据进行本地声光报警
 	xTaskCreate(UITask,"UI",384,NULL,2,&g_UITaskHandle);//OLED显示各数据，菜单状态机，按键控制。
-	xTaskCreate(FingerTask,"Finger",384,NULL,2,&g_FingerTaskHandle);//指纹验证处理
+	//xTaskCreate(FingerTask,"Finger",384,NULL,2,&g_FingerTaskHandle);//指纹验证(暂未接硬件)
 	xTaskCreate(WatchdogTask, "Watchdog", 128, NULL, 6, &g_WatchdogTaskHandle);//看门狗
   /* USER CODE END RTOS_THREADS */
 

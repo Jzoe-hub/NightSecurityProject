@@ -37,17 +37,17 @@ static uint8_t check_fire(float smoke_ppm, float co_ppm,
         uint16_t fire_int, int temp)
 {
     float score = 0;
-    /* 1. 火焰强度: 大于 2000 说明有明显火焰, 贡献 40 分 */
-    if (fire_int > 2000)
+    /* 1. 火焰强度: 超过阈值, 贡献 40 分 */
+    if (fire_int > th_fire)
         score += 40;
-    /* 2. MQ-2 烟雾: 超过 10ppm 说明有烟雾, 贡献 30 分 */
-    if (smoke_ppm > 10)
+    /* 2. MQ-2 烟雾: 超过阈值, 贡献 30 分 */
+    if (smoke_ppm > th_smoke)
         score += 30;
-    /* 3. MQ-7 CO: 超过 10ppm 说明有一氧化碳, 贡献 20 分 */
-    if (co_ppm > 10)
+    /* 3. MQ-7 CO: 超过阈值, 贡献 20 分 */
+    if (co_ppm > th_co)
         score += 20;
-    /* 4. 温度: 超过 45℃ 说明环境异常升温, 贡献 10 分 */
-    if (temp > 45)
+    /* 4. 温度: 超过阈值, 贡献 10 分 */
+    if (temp > th_temp)
         score += 10;
     /* 判定: 总分 100, ≥60 确认火灾, ≥30 预警 */
     if (score < 30)       return 0;
@@ -116,6 +116,12 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 	static uint8_t state   = STATE_DISARMED;   // 当前状态
 	static uint8_t counter = 0;                 // 连续确认/安全计数
 
+	/* 根据 g_sw_armed 切换撤防/布防 */
+	if (g_sw_armed && state == STATE_DISARMED)
+		state = STATE_ARMED;
+	if (!g_sw_armed && state != STATE_DISARMED)
+		state = STATE_DISARMED;
+
 	/*
 	 * 状态转换总览:
 	 *   撤防 ──(火灾≥1)──→ 预警 ──(3次确认)──→ 报警
@@ -123,16 +129,9 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
 	 */
 	switch (state)
 	{
-	case STATE_DISARMED:
-		/* 1. 撤防: 仅检测火灾, 入侵被忽略 */
-		if (fire_level >= 1)
-		{
-			state   = STATE_WARNING;
-			counter = 1;
-			return 1;
-		}
-		return 0;
-		break;
+		case STATE_DISARMED:
+			/* 1. 撤防: 不触发任何报警, 只采集数据 */
+			return 0;
 	case STATE_ARMED:
 		/* 2. 布防: 火灾或入侵任一触发即进入预警 */
 		if (fire_level >= 1 || intrusion_level >= 1)
@@ -186,11 +185,12 @@ static uint8_t run_state_machine(uint8_t fire_level, uint8_t intrusion_level)
  * 输入参数： level — 报警等级
  * 返 回 值： 无
  ***********************************************************************/
-static void dispatch_alarm(uint8_t level,uint8_t type)
+static void dispatch_alarm(uint8_t level, uint8_t type)
 {
-	Security_Data.type = type;
+	if (level == 0) return;                         /* 无报警, 不发送 */
+	Security_Data.type  = type;
 	Security_Data.level = level;
-	xQueueSend(g_securityQueue, &Security_Data, 0);    // 发给 AlarmTask
+	xQueueSend(g_securityQueue, &Security_Data, 0); /* 发给 AlarmTask */
 }
 
 /* ==================== 任务主函数 ==================== */

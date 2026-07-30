@@ -7,12 +7,12 @@
 
 void Buzzer_On(void)
 {
-	HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_RESET); /* 低电平触发 */
 }
 
 void Buzzer_Off(void)
 {
-	HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_SET);   /* 高电平关 */
 }
 
 void Buzzer_Beep(uint16_t ms)

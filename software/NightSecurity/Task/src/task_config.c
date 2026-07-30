@@ -15,4 +15,5 @@ TaskHandle_t g_WatchdogTaskHandle = NULL;
 /* ===== 队列/信号量句柄定义 ===== */
 QueueHandle_t g_sensorQueue   = NULL;
 QueueHandle_t g_securityQueue = NULL;
+uint8_t      g_sw_armed       = 0;     /* 0=撤防 1=布防 */
 

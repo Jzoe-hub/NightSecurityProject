@@ -45,7 +45,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/iwdg.h ../Core/Inc/rtc.h ../Core/Inc/tim.h \
  ../Core/Inc/usart.h ../Core/Inc/gpio.h \
  D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/oled.h \
- D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/mq7.h
+ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/mq7.h \
+ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/buzzer.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -100,3 +101,4 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/gpio.h:
 D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/oled.h:
 D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/mq7.h:
+D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/buzzer.h:

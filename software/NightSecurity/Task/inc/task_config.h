@@ -65,11 +65,21 @@ extern QueueHandle_t g_sensorQueue;
 extern QueueHandle_t g_securityQueue;
 
 
+/*=====================可调阈值 (UI 调节, SecurityTask 使用)=======================*/
+extern uint16_t th_fire;
+extern uint8_t  th_smoke;
+extern uint8_t  th_co;
+extern uint8_t  th_temp;
+extern uint8_t  th_pir;
+
 /*=====================看门狗心跳=======================*/
 extern volatile uint32_t g_heartbeat_sensor;
 extern volatile uint32_t g_heartbeat_security;
 extern volatile uint32_t g_heartbeat_alarm;
 extern volatile uint32_t g_heartbeat_ui;
 extern volatile uint32_t g_heartbeat_finger;
+
+/* 安防开关: 0=撤防 1=布防, 多个任务共用 */
+extern uint8_t g_sw_armed;
 
 #endif
