@@ -116,8 +116,7 @@ int main(void)
   HAL_Delay(2000);
 
   /* 初始化外设默认状态 */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);  /* 蜂鸣器初始关     */
-  Buzzer_Off();                                           /* 双重保险         */
+  Buzzer_Off();                                        /* 蜂鸣器初始关 */
 
   /* 启动 ADC DMA 供 SensorTask 使用 */
   HAL_TIM_Base_Start(&htim3);

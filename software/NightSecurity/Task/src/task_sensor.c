@@ -117,6 +117,42 @@ static void read_radar_data(uint8_t *has_person, uint16_t *motion_dist,
 	*static_dist   = Detection_Target_LD2410C.STATIC_target_distance;
 	*static_energy = Detection_Target_LD2410C.STATIC_target_energy;
 }
+/**********************************************************************
+ * 函数名称： ewma_filter
+ * 功能描述： 一阶指数加权滑动平均，用 static 变量保存上一轮平滑值
+ * 输入参数： raw   — 本轮原始值
+ *            alpha — 平滑系数 (0~1),越大越平滑,响应越慢
+ *            p_old — 指向 static 变量, 保存上一轮平滑结果
+ * 返 回 值： 平滑后的值
+ ***********************************************************************/
+static float ewma_filter(float raw, float alpha, float *p_old)
+{
+    float result = alpha * (*p_old) + (1.0f - alpha) * raw;
+    *p_old = result;
+    return result;
+}
+/**********************************************************************
+ * 函数名称： median_filter_3
+ * 功能描述： 3 窗口排序取中值——消除单采样尖峰, 火焰/开关量传感器专用
+ * 输入参数： val — 当前原始值
+ *            buf — 环形缓冲区 (static, 存最近 3 次值)
+ *            idx — 写入位置指针 (static)
+ * 返 回 值： 3 个值的中值
+ ***********************************************************************/
+static uint16_t median_filter_3(uint16_t val, uint16_t buf[3], uint8_t *idx)
+{
+	 buf[*idx] = val;
+	 *idx = (*idx + 1) % 3;
+
+	 uint8_t a = buf[0];
+	 uint8_t b = buf[1];
+	 uint8_t c = buf[2];
+	 uint8_t t = 0;
+	 if(a>b) {t = a;a = b; b = t;}
+	 if(a>c) {t = a;a = c; c = t;}
+	 if(b>c) {t = b;b = c; c = t;}
+	 return b;
+}
 
 /**********************************************************************
  * 函数名称： publish_sensor_data
@@ -133,6 +169,31 @@ static void publish_sensor_data(float smoke, float co, uint16_t fire_int,
 		uint8_t pir, uint8_t fire_do, int temp, int hum,
 		uint8_t has_person)
 {
+	/* ---- 中值滤波 + EWMA 状态 ---- */
+	static uint16_t fire_buf[3] = {0};
+	static uint8_t  fire_idx    = 0;
+	static float s_smoke 	= 0.0f;	/* MQ-2 上一轮平滑值 */
+	static float s_co  		= 0.0f; /* MQ-7 上一轮平滑值 */
+	static float s_fire_int = 0.0f; /* 火焰强度上一轮平滑值 */
+	static float s_temp 		= 0.0f; /* 温度上一轮平滑值 */
+	static uint8_t first_run	= 1;	/* 首次运行标记 */
+
+	if(first_run == 1)
+	{
+		s_smoke = smoke;
+		s_co    = co;
+		s_fire_int  = (float)fire_int;
+		s_temp  = (float)temp;
+		first_run = 0;
+	}
+	smoke    = ewma_filter(smoke,0.4f, &s_smoke);  /* MQ-2 烟雾 */
+	co       = ewma_filter(co,0.4f, &s_co);     /* MQ-7 CO   */
+
+	fire_int = median_filter_3(fire_int, fire_buf, &fire_idx);/* 火焰先取中值再做ewma*/
+	fire_int = (uint16_t)ewma_filter((float)fire_int, 0.95f, &s_fire_int);
+
+	temp     = (int)ewma_filter((float)temp, 0.40f, &s_temp);  /* 温度 */
+
 	SensorFireData Sensor_fire;
 		Sensor_fire.smoke_ppm		   = smoke;
 		Sensor_fire.co_ppm			   = co;
