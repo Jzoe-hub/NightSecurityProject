@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 信任所有证书 (开发阶段, 生产环境应配置正确的 CA) -->
+    <base-config>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <!-- EMQX Broker 允许自签/非标准证书 -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">emqxsl.cn</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

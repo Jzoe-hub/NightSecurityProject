@@ -39,9 +39,18 @@ typedef struct{
 	int level;
 }AlarmCMD;
 
+// 下行命令包 (ESP8266→CommTask→SecurityTask)
+typedef struct{
+	uint8_t  type;           // ESP_TYPE_CMD / ESP_TYPE_CONFIG
+	uint8_t  json[192];      // JSON 字符串
+	uint16_t len;            // JSON 实际长度
+}CloudRxPacket;
+
 extern SensorPacket Sensor_Data;
 extern AlarmCMD Security_Data;
 extern uint8_t state_result;
+extern uint8_t g_sw_armed;/* 安防开关: 0=撤防 1=布防, 多个任务共用 */
+
 
 /*==================任务函数和任务句柄======================*/
 void SensorTask(void *pvParameters);
@@ -50,19 +59,21 @@ void AlarmTask(void *pvParameters);
 void UITask(void *pvParameters);
 void FingerTask(void *pvParameters);
 void WatchdogTask(void *pvParameters);
-
+void CommTask(void *pvParameters);
 extern TaskHandle_t g_SensorTaskHandle;
 extern TaskHandle_t g_SecurityTaskHandle;
 extern TaskHandle_t g_AlarmTaskHandle;
 extern TaskHandle_t g_UITaskHandle;
 extern TaskHandle_t g_FingerTaskHandle;
 extern TaskHandle_t g_WatchdogTaskHandle;
+extern TaskHandle_t g_CommTaskHandle;
 
 /*==================队列句柄======================*/
 
 /* 队列句柄 */
 extern QueueHandle_t g_sensorQueue;
 extern QueueHandle_t g_securityQueue;
+extern QueueHandle_t g_cmdQueue;       /* CommTask → SecurityTask   */
 
 
 /*=====================可调阈值 (UI 调节, SecurityTask 使用)=======================*/
@@ -78,8 +89,8 @@ extern volatile uint32_t g_heartbeat_security;
 extern volatile uint32_t g_heartbeat_alarm;
 extern volatile uint32_t g_heartbeat_ui;
 extern volatile uint32_t g_heartbeat_finger;
+extern volatile uint32_t g_heartbeat_comm;
 
-/* 安防开关: 0=撤防 1=布防, 多个任务共用 */
-extern uint8_t g_sw_armed;
+
 
 #endif

@@ -33,6 +33,7 @@
 #include "oled.h"
 #include "mq7.h"
 #include "buzzer.h"
+#include "esp8266.h"
 #include <stdio.h>
 /* USER CODE END Includes */
 
@@ -117,6 +118,7 @@ int main(void)
 
   /* 初始化外设默认状态 */
   Buzzer_Off();                                        /* 蜂鸣器初始关 */
+  Esp8266_Init();                                      /* ESP8266 DMA 接收启动 */
 
   /* 启动 ADC DMA 供 SensorTask 使用 */
   HAL_TIM_Base_Start(&htim3);

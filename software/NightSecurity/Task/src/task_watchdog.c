@@ -13,6 +13,7 @@ volatile uint32_t g_heartbeat_security;
 volatile uint32_t g_heartbeat_alarm;
 volatile uint32_t g_heartbeat_ui;
 volatile uint32_t g_heartbeat_finger;
+volatile uint32_t g_heartbeat_comm;
 
 /* ==================== 看门狗子函数 ==================== */
 
@@ -39,18 +40,20 @@ static bool wdg_check_heartbeats(void)
 {
 	/* TODO */
 	static uint32_t last_sensor, last_security, last_alarm, last_ui;
-	//static uint32_t last_finger;                                  /* 等 FingerTask 启用后恢复 */
+	static uint32_t last_comm;
+	//static uint32_t last_finger;
 	if (g_heartbeat_sensor   == last_sensor)   return false;
 	if (g_heartbeat_security == last_security) return false;
 	if (g_heartbeat_alarm    == last_alarm)    return false;
 	if (g_heartbeat_ui       == last_ui)       return false;
-	//if (g_heartbeat_finger == last_finger) return false;        /* 等 FingerTask 启用后恢复 */
+	if (g_heartbeat_comm     == last_comm)     return false;
+	//if (g_heartbeat_finger == last_finger) return false;
 
 	last_sensor   = g_heartbeat_sensor;
 	last_security = g_heartbeat_security;
 	last_alarm    = g_heartbeat_alarm;
 	last_ui       = g_heartbeat_ui;
-	//last_finger  = g_heartbeat_finger;                          /* 等 FingerTask 启用后恢复 */
+	last_comm     = g_heartbeat_comm;
 
 	return true;
 }

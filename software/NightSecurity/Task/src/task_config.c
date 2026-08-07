@@ -5,15 +5,17 @@
 #include "task_config.h"
 
 /* ===== 任务句柄定义 ===== */
-TaskHandle_t g_SensorTaskHandle  = NULL;
+TaskHandle_t g_SensorTaskHandle   = NULL;
 TaskHandle_t g_SecurityTaskHandle = NULL;
-TaskHandle_t g_AlarmTaskHandle   = NULL;
-TaskHandle_t g_UITaskHandle      = NULL;
-TaskHandle_t g_FingerTaskHandle  = NULL;
+TaskHandle_t g_AlarmTaskHandle    = NULL;
+TaskHandle_t g_UITaskHandle       = NULL;
+TaskHandle_t g_FingerTaskHandle   = NULL;
 TaskHandle_t g_WatchdogTaskHandle = NULL;
+TaskHandle_t g_CommTaskHandle     = NULL;
 
 /* ===== 队列/信号量句柄定义 ===== */
 QueueHandle_t g_sensorQueue   = NULL;
 QueueHandle_t g_securityQueue = NULL;
-uint8_t      g_sw_armed       = 0;     /* 0=撤防 1=布防 */
+QueueHandle_t g_cmdQueue      = NULL;
+
 

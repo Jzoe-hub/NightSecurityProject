@@ -4,6 +4,7 @@
  *           传感器数据融合 + 火灾/入侵判定 + 状态机 + 报警调度
  ***********************************************************************/
 #include "task_config.h"
+#include <string.h>
 
 /*======================宏定义和全局变量====================*/
 #define STATE_DISARMED  0
@@ -15,6 +16,7 @@ uint8_t fire_level;
 uint8_t intrusion_level;
 uint8_t state_result;
 AlarmCMD Security_Data;
+uint8_t g_sw_armed = 0;
 
 /* ==================== 融合处理子函数 ==================== */
 
@@ -212,6 +214,17 @@ void SecurityTask(void *pvParameters)
 	for (;;)
 	{
 		g_heartbeat_security++;
+
+		/* ---- 处理 APP 下发命令 (非阻塞) ---- */
+		CloudRxPacket cmd;
+		if (xQueueReceive(g_cmdQueue, &cmd, 0) == pdPASS)
+		{
+			if (strstr((char*)cmd.json, "\"arm\""))
+				g_sw_armed = 1;
+			else if (strstr((char*)cmd.json, "\"disarm\""))
+				g_sw_armed = 0;
+		}
+
 		xQueueReceive(g_sensorQueue, &Sensor_Data, portMAX_DELAY); // 等队列同步过来传感器数据包
 		fire_level = check_fire(Sensor_Data.fire.smoke_ppm,
 				Sensor_Data.fire.co_ppm,

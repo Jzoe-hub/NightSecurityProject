@@ -11,6 +11,7 @@
  ***********************************************************************/
 #include "radar.h"
 #include "usart.h"         /* CubeMX 生成, 声明 huart1 */
+#include "esp8266.h"       /* Esp8266_ProcessRxData()   */
 #include <string.h>
 
 /* ---- 全局实例定义 ---- */
@@ -102,6 +103,10 @@ void Radar_Init(void)
  ***********************************************************************/
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
+	if (huart->Instance == USART2) {             /* ESP8266 的数据       */
+		Esp8266_ProcessRxData(Size);
+		return;
+	}
 	if (huart->Instance != USART1) return;       /* 只处理雷达的 UART    */
 
 	/* 拷贝接收到的数据到处理缓冲区 */
