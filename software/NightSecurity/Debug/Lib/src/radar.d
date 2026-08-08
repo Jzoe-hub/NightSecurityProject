@@ -31,7 +31,8 @@ Lib/src/radar.o: ../Lib/src/radar.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/usart.h ../Core/Inc/main.h
+ ../Core/Inc/usart.h ../Core/Inc/main.h \
+ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/esp8266.h
 D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/radar.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -66,3 +67,4 @@ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurit
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/main.h:
+D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/esp8266.h:

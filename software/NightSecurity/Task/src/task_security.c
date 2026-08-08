@@ -4,7 +4,9 @@
  *           传感器数据融合 + 火灾/入侵判定 + 状态机 + 报警调度
  ***********************************************************************/
 #include "task_config.h"
+#include <stdio.h>    /* snprintf */
 #include <string.h>
+#include <stdlib.h>   /* atoi */
 
 /*======================宏定义和全局变量====================*/
 #define STATE_DISARMED  0
@@ -195,6 +197,19 @@ static void dispatch_alarm(uint8_t level, uint8_t type)
 	xQueueSend(g_securityQueue, &Security_Data, 0); /* 发给 AlarmTask */
 }
 
+/**********************************************************************
+ * 函数名称： json_get_int
+ * 功能描述： 在 JSON 字符串中查找 "key":value, 返回 value 的整数值
+ ***********************************************************************/
+static int json_get_int(const char *json, const char *key)
+{
+    char search[16];
+    snprintf(search, sizeof(search), "\"%s\":", key);
+    char *pos = strstr((char*)json, search);
+    if (pos) return atoi(pos + strlen(search));
+    return -1;
+}
+
 /* ==================== 任务主函数 ==================== */
 
 /**********************************************************************
@@ -219,10 +234,18 @@ void SecurityTask(void *pvParameters)
 		CloudRxPacket cmd;
 		if (xQueueReceive(g_cmdQueue, &cmd, 0) == pdPASS)
 		{
-			if (strstr((char*)cmd.json, "\"arm\""))
+			if (strstr((char*)cmd.json, "\"arm\"")) {
 				g_sw_armed = 1;
-			else if (strstr((char*)cmd.json, "\"disarm\""))
+			} else if (strstr((char*)cmd.json, "\"disarm\"")) {
 				g_sw_armed = 0;
+			} else if (strstr((char*)cmd.json, "\"config\"")) {
+				int v;
+				v = json_get_int((char*)cmd.json, "fire");  if (v >= 0) th_fire  = (uint16_t)v;
+				v = json_get_int((char*)cmd.json, "smoke"); if (v >= 0) th_smoke = (uint8_t)v;
+				v = json_get_int((char*)cmd.json, "co");    if (v >= 0) th_co    = (uint8_t)v;
+				v = json_get_int((char*)cmd.json, "temp");  if (v >= 0) th_temp  = (uint8_t)v;
+				v = json_get_int((char*)cmd.json, "pir");   if (v >= 0) th_pir   = (uint8_t)v;
+			}
 		}
 
 		xQueueReceive(g_sensorQueue, &Sensor_Data, portMAX_DELAY); // 等队列同步过来传感器数据包

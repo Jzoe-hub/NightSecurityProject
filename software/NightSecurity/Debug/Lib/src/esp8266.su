@@ -1,0 +1,6 @@
+../Lib/src/esp8266.c:40:17:crc16_modbus	24	static
+../Lib/src/esp8266.c:65:13:esp8266_parse_frame	32	static
+../Lib/src/esp8266.c:140:6:Esp8266_ProcessRxData	16	static
+../Lib/src/esp8266.c:154:6:Esp8266_Init	8	static
+../Lib/src/esp8266.c:172:6:Esp8266_SendFrame	280	static
+../Lib/src/esp8266.c:205:6:Esp8266_GetFrame	16	static,ignoring_inline_asm

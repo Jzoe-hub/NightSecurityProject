@@ -104,7 +104,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin : PIR_OUT_Pin */
   GPIO_InitStruct.Pin = PIR_OUT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;    /* 悬空默认低→无人 */
   HAL_GPIO_Init(PIR_OUT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Fire_DO_Pin */

@@ -46,7 +46,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/usart.h ../Core/Inc/gpio.h \
  D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/oled.h \
  D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/mq7.h \
- D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/buzzer.h
+ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/buzzer.h \
+ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/esp8266.h \
+ D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/radar.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -102,3 +104,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/oled.h:
 D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/mq7.h:
 D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/buzzer.h:
+D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/esp8266.h:
+D:/keil.project2/NightSecurityProject/NightSecurityProject/software/NightSecurity/Lib/inc/radar.h:

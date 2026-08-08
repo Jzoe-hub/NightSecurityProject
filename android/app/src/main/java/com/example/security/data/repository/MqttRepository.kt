@@ -61,6 +61,18 @@ class MqttRepository {
             client.setCallback(object : MqttCallback {
                 override fun connectionLost(cause: Throwable?) {
                     _sensorState.value = _sensorState.value.copy(online = false)
+                    /* 自动重连 */
+                    Thread {
+                        while (!client.isConnected) {
+                            try {
+                                Thread.sleep(3000)
+                                client.connect(options)
+                                client.subscribe("women_safe/device_001/state", 1)
+                                _sensorState.value = _sensorState.value.copy(online = true)
+                                Log.d("MQTT", "Reconnected!")
+                            } catch (_: Exception) {}
+                        }
+                    }.start()
                 }
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
@@ -154,6 +166,7 @@ class MqttRepository {
 
     private fun publish(topic: String, json: String) {
         try {
+            if (!client.isConnected) return
             val msg = MqttMessage(json.toByteArray()).apply { qos = 1 }
             client.publish(topic, msg)
             Log.d("MQTT", "PUB topic=$topic payload=$json")

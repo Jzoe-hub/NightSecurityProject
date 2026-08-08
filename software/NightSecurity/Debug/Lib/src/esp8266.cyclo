@@ -1,0 +1,6 @@
+../Lib/src/esp8266.c:40:17:crc16_modbus	4
+../Lib/src/esp8266.c:65:13:esp8266_parse_frame	13
+../Lib/src/esp8266.c:140:6:Esp8266_ProcessRxData	3
+../Lib/src/esp8266.c:154:6:Esp8266_Init	1
+../Lib/src/esp8266.c:172:6:Esp8266_SendFrame	4
+../Lib/src/esp8266.c:205:6:Esp8266_GetFrame	2

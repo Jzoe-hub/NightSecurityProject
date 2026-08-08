@@ -12,17 +12,15 @@ data class DeviceInfo(
     val wifiRssi:   Int = -45
 )
 
-data class Thresholds(
-    val fire:  Int = 2000,
-    val smoke: Int = 10,
-    val co:    Int = 10,
-    val temp:  Int = 45,
-    val pir:   Int = 1
-)
-
 class SettingsViewModel : ViewModel() {
 
     val deviceInfo  = MutableStateFlow(DeviceInfo())
-    val thresholds  = MutableStateFlow(Thresholds())
     val mqttStatus  = MutableStateFlow("已连接")
+
+    /* ---- 阈值 (String 适配 TextField, ViewModel 持有跨页面保持) ---- */
+    val thFire  = MutableStateFlow("2000")
+    val thSmoke = MutableStateFlow("10")
+    val thCo    = MutableStateFlow("10")
+    val thTemp  = MutableStateFlow("45")
+    val thPir   = MutableStateFlow("1")
 }

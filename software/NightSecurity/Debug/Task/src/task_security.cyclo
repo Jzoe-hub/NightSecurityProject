@@ -1,5 +1,6 @@
-../Task/src/task_security.c:36:16:check_fire	7
-../Task/src/task_security.c:74:16:check_intrusion	8
-../Task/src/task_security.c:114:16:run_state_machine	15
-../Task/src/task_security.c:188:13:dispatch_alarm	2
-../Task/src/task_security.c:209:6:SecurityTask	2
+../Task/src/task_security.c:40:16:check_fire	7
+../Task/src/task_security.c:78:16:check_intrusion	8
+../Task/src/task_security.c:118:16:run_state_machine	15
+../Task/src/task_security.c:192:13:dispatch_alarm	2
+../Task/src/task_security.c:204:12:json_get_int	2
+../Task/src/task_security.c:226:6:SecurityTask	11

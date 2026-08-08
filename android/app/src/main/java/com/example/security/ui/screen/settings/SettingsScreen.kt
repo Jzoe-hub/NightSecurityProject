@@ -23,12 +23,12 @@ fun SettingsScreen(
     val device by viewModel.deviceInfo.collectAsState()
     val status by viewModel.mqttStatus.collectAsState()
 
-    /* ---- 可编辑阈值 ---- */
-    var thFire  by remember { mutableStateOf("2000") }
-    var thSmoke by remember { mutableStateOf("10") }
-    var thCo    by remember { mutableStateOf("10") }
-    var thTemp  by remember { mutableStateOf("45") }
-    var thPir   by remember { mutableStateOf("1") }
+    /* ---- 可编辑阈值 (ViewModel 持有, 跨页面保持) ---- */
+    val thFire  by viewModel.thFire.collectAsState()
+    val thSmoke by viewModel.thSmoke.collectAsState()
+    val thCo    by viewModel.thCo.collectAsState()
+    val thTemp  by viewModel.thTemp.collectAsState()
+    val thPir   by viewModel.thPir.collectAsState()
 
     Scaffold(
         topBar = {
@@ -58,11 +58,11 @@ fun SettingsScreen(
                     Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    ThresholdInput("🔥 火焰强度", thFire,  { thFire  = it })
-                    ThresholdInput("💨 烟雾 ppm", thSmoke, { thSmoke = it })
-                    ThresholdInput("☠ CO ppm",   thCo,    { thCo    = it })
-                    ThresholdInput("🌡 温度 °C",  thTemp,  { thTemp  = it })
-                    ThresholdInput("👤 PIR",      thPir,   { thPir   = it })
+                    ThresholdInput("🔥 火焰强度", thFire,  { viewModel.thFire.value  = it })
+                    ThresholdInput("💨 烟雾 ppm", thSmoke, { viewModel.thSmoke.value = it })
+                    ThresholdInput("☠ CO ppm",   thCo,    { viewModel.thCo.value    = it })
+                    ThresholdInput("🌡 温度 °C",  thTemp,  { viewModel.thTemp.value  = it })
+                    ThresholdInput("👤 PIR",      thPir,   { viewModel.thPir.value   = it })
 
                     Spacer(Modifier.height(8.dp))
 
