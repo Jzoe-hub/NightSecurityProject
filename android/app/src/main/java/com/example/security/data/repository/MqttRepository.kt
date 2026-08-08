@@ -8,6 +8,9 @@ import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.json.JSONObject
 import java.security.SecureRandom
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
@@ -18,6 +21,13 @@ import javax.net.ssl.X509TrustManager
  */
 class MqttRepository {
 
+    companion object {
+        @Volatile private var instance: MqttRepository? = null
+        fun getInstance(): MqttRepository = instance ?: synchronized(this) {
+            instance ?: MqttRepository().also { instance = it }
+        }
+    }
+
     private val brokerUrl = "ssl://c0dde8f6.ala.cn-hangzhou.emqxsl.cn:8883"
     private val clientId  = "android_device_001"
 
@@ -27,6 +37,9 @@ class MqttRepository {
     /* ---- 数据流 ---- */
     private val _sensorState = MutableStateFlow(SensorState())
     val sensorState: StateFlow<SensorState> = _sensorState
+
+    private val _rawLog = MutableStateFlow(listOf("等待数据..."))
+    val rawLog: StateFlow<List<String>> = _rawLog
 
     init {
         connectAndSubscribe()
@@ -99,6 +112,12 @@ class MqttRepository {
 
     private fun parseStateJson(json: String) {
         try {
+            val ts = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+            val line = "[$ts] $json"
+            val log = _rawLog.value.toMutableList()
+            log.add(line)
+            if (log.size > 50) log.removeAt(0)   /* 最多保留 50 条 */
+            _rawLog.value = log
             val obj = JSONObject(json)
             /* 过滤非 state 消息 (online/offline/heartbeat) */
             if (obj.optString("type", "") != "state") return
@@ -120,12 +139,26 @@ class MqttRepository {
         }
     }
 
+    /* ==================== 下发阈值 ==================== */
+
+    fun sendThresholds(fire: String, smoke: String, co: String, temp: String, pir: String) {
+        val json = """{"type":"config","threshold":{"fire":$fire,"smoke":$smoke,"co":$co,"temp":$temp,"pir":$pir}}"""
+        publish("women_safe/device_001/config", json)
+    }
+
     /* ==================== 下发命令 ==================== */
 
     fun sendCommand(json: String) {
+        publish("women_safe/device_001/cmd", json)
+    }
+
+    private fun publish(topic: String, json: String) {
         try {
             val msg = MqttMessage(json.toByteArray()).apply { qos = 1 }
-            client.publish("women_safe/device_001/cmd", msg)
-        } catch (_: Exception) {}
+            client.publish(topic, msg)
+            Log.d("MQTT", "PUB topic=$topic payload=$json")
+        } catch (e: Exception) {
+            Log.e("MQTT", "Publish failed", e)
+        }
     }
 }

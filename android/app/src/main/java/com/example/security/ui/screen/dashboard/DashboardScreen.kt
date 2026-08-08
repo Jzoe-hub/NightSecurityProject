@@ -2,7 +2,11 @@ package com.example.security.ui.screen.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -25,6 +29,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val rawLog by viewModel.rawLog.collectAsState()
     val loading by viewModel.isLoading.collectAsState()
 
     if (loading) {
@@ -42,11 +47,33 @@ fun DashboardScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 传感器网格 2列×3行
             SensorGrid(state)
+
+            /* ---- MQTT 原始数据 (滚动日志) ---- */
+            Text("MQTT 原始数据", fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary)
+            Surface(
+                modifier = Modifier.fillMaxWidth().height(160.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = Color(0xFF263238)
+            ) {
+                LazyColumn(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    items(rawLog.size) { i ->
+                        Text(
+                            text = rawLog[i],
+                            fontSize = 10.sp,
+                            color = Color(0xFF4CAF50),
+                            lineHeight = 14.sp
+                        )
+                    }
+                }
+            }
         }
     }
 }

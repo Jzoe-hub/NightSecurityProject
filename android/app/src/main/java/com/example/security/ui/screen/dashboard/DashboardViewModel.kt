@@ -11,9 +11,10 @@ import kotlinx.coroutines.launch
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = MqttRepository()
+    private val repository = MqttRepository.getInstance()
 
     val state: StateFlow<SensorState> = repository.sensorState
+    val rawLog: StateFlow<List<String>> = repository.rawLog
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
