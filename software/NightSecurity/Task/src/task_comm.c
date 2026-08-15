@@ -39,6 +39,7 @@ void CommTask(void *pvParameters)
                 {
                     rx.type = frame.type;
                     rx.len  = frame.len;
+                    memset(rx.json, 0, sizeof(rx.json));   /* 清零, 防残留 */
                     if (frame.len > 0)
                         memcpy(rx.json, frame.payload, frame.len);
                     rx.json[frame.len] = '\0';

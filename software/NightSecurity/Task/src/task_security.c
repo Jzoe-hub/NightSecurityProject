@@ -4,6 +4,7 @@
  *           传感器数据融合 + 火灾/入侵判定 + 状态机 + 报警调度
  ***********************************************************************/
 #include "task_config.h"
+#include "voice.h"
 #include <stdio.h>    /* snprintf */
 #include <string.h>
 #include <stdlib.h>   /* atoi */
@@ -234,9 +235,12 @@ void SecurityTask(void *pvParameters)
 		CloudRxPacket cmd;
 		if (xQueueReceive(g_cmdQueue, &cmd, 0) == pdPASS)
 		{
-			if (strstr((char*)cmd.json, "\"arm\"")) {
+			if (strstr((char*)cmd.json, "\"action\":\"arm\"")) {
+				if (g_sw_armed == 0) {
+					Voice_IO4_Trigger();          /* 只在 0→1 时触发布防语音 */
+				}
 				g_sw_armed = 1;
-			} else if (strstr((char*)cmd.json, "\"disarm\"")) {
+			} else if (strstr((char*)cmd.json, "\"action\":\"disarm\"")) {
 				g_sw_armed = 0;
 			} else if (strstr((char*)cmd.json, "\"config\"")) {
 				int v;

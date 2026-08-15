@@ -28,11 +28,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun toggleArm() {
-        val current = state.value
-        val newArmed = !current.armed
-        val action = if (newArmed) "arm" else "disarm"
-        val json = """{"action":"$action","params":{"armed":${if (newArmed) 1 else 0}}}"""
-        repository.sendCommand(json)
+    fun arm() {
+        repository.sendCommand("""{"action":"arm","params":{"armed":1}}""")
+    }
+
+    fun disarm() {
+        repository.sendCommand("""{"action":"disarm","params":{"armed":0}}""")
     }
 }

@@ -41,6 +41,11 @@ class MqttRepository {
     private val _rawLog = MutableStateFlow(listOf("等待数据..."))
     val rawLog: StateFlow<List<String>> = _rawLog
 
+    /* 乐观更新布防状态 (点击立即翻转, 不等 MQTT 回传) */
+    fun updateLocalArmed(armed: Boolean) {
+        _sensorState.value = _sensorState.value.copy(armed = armed)
+    }
+
     init {
         connectAndSubscribe()
     }

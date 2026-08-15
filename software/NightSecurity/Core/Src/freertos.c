@@ -102,7 +102,7 @@ void MX_FREERTOS_Init(void) {
   /* add queues, ... */
 	g_sensorQueue = xQueueCreate(5,sizeof(SensorPacket));
 	g_securityQueue = xQueueCreate(5,sizeof(AlarmCMD));
-	g_cmdQueue      = xQueueCreate(4,sizeof(CloudRxPacket));  /* CommTask→SecurityTask */
+	g_cmdQueue      = xQueueCreate(2,sizeof(CloudRxPacket));  /* CommTask→SecurityTask (省RAM) */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -112,10 +112,10 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 	xTaskCreate(SensorTask,"Sensor",256,NULL,3,&g_SensorTaskHandle);//火灾/入侵的各类传感器读取数据
-	xTaskCreate(SecurityTask,"Security",384,NULL,4,&g_SecurityTaskHandle);//对传感器数据融合处理(省RAM)
+	xTaskCreate(SecurityTask,"Security",320,NULL,4,&g_SecurityTaskHandle);//对传感器数据融合处理(省RAM)
 	xTaskCreate(AlarmTask,"Alarm",256,NULL,5,&g_AlarmTaskHandle);//由处理后的数据进行本地声光报警
-	xTaskCreate(UITask,"UI",384,NULL,2,&g_UITaskHandle);//OLED显示各数据，菜单状态机，按键控制。
-	//xTaskCreate(FingerTask,"Finger",384,NULL,2,&g_FingerTaskHandle);//指纹验证(暂未接硬件)
+	xTaskCreate(UITask,"UI",320,NULL,2,&g_UITaskHandle);//OLED显示各数据，菜单状态机，按键控制。(省RAM)
+	xTaskCreate(FingerTask,"Finger",256,NULL,2,&g_FingerTaskHandle);//指纹验证
 	xTaskCreate(WatchdogTask, "Watchdog", 128, NULL, 6, &g_WatchdogTaskHandle);//看门狗
 	xTaskCreate(CommTask,  "Comm",  256, NULL, 3, &g_CommTaskHandle);   //MQTT协议+JSON
   /* USER CODE END RTOS_THREADS */

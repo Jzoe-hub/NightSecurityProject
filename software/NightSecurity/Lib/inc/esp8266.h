@@ -20,7 +20,7 @@
 #define ESP_FRAME_ETX       0x55   /* 帧尾                   */
 #define ESP_RX_BUF_SIZE     128    /* DMA 循环接收缓冲区（极限省RAM） */
 #define ESP_FRAME_BUF_SIZE  256    /* 帧解析缓冲区                    */
-#define ESP_PAYLOAD_MAX     192    /* 单帧最大负载（对齐JSON大小）    */
+#define ESP_PAYLOAD_MAX     128    /* 单帧最大负载（命令JSON最大80字节） */
 #define ESP_FRAME_QUEUE_LEN 2      /* 接收帧环形缓冲区（省RAM）       */
 
 /* ==================== TYPE 码 ==================== */

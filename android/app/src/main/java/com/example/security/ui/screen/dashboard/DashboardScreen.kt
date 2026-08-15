@@ -41,7 +41,7 @@ fun DashboardScreen(
 
     Scaffold(
         topBar = { DashboardTopBar(state) },
-        bottomBar = { ArmBottomBar(state.armed, viewModel::toggleArm) }
+        bottomBar = { ArmBottomBar(state.armed, viewModel::arm, viewModel::disarm) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -197,32 +197,47 @@ private fun SensorCard(
     }
 }
 
-/* ==================== 底部布防按钮 ==================== */
+/* ==================== 底部布防/撤防按钮 ==================== */
 
 @Composable
-private fun ArmBottomBar(armed: Boolean, onToggle: () -> Unit) {
+private fun ArmBottomBar(armed: Boolean, onArm: () -> Unit, onDisarm: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 8.dp,
         color = MaterialTheme.colorScheme.surface
     ) {
-        Button(
-            onClick = onToggle,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (armed) Color(0xFFF44336) else Color(0xFF4CAF50)
-            ),
-            shape = RoundedCornerShape(12.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                if (armed) "撤 防" else "布 防",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+            /* 布防按钮 */
+            Button(
+                onClick = onArm,
+                modifier = Modifier.weight(1f).height(48.dp),
+                enabled = !armed,                       /* 已布防则禁用 */
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50),
+                    disabledContainerColor = Color(0xFF4CAF50).copy(alpha = 0.3f)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("布 防", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            }
+            /* 撤防按钮 */
+            Button(
+                onClick = onDisarm,
+                modifier = Modifier.weight(1f).height(48.dp),
+                enabled = armed,                        /* 未布防则禁用 */
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFF44336),
+                    disabledContainerColor = Color(0xFFF44336).copy(alpha = 0.3f)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("撤 防", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            }
         }
     }
 }

@@ -5,7 +5,7 @@
  ***********************************************************************/
 #include "task_config.h"
 #include "finger.h"
-#include "oled.h"
+#include "voice.h"
 #include <stdbool.h>
 
 /* ==================== 指纹流程子函数 ==================== */
@@ -22,7 +22,10 @@ static bool finger_wait_touch(uint32_t timeout_ms)
 	if (timeout_ms == 0)                    /* 0 = 永久等待            */
 	{
 		while (!Finger_IsTouched())
+		{
+			g_heartbeat_finger++;            /* 等待期间喂心跳, 防看门狗复位 */
 			vTaskDelay(pdMS_TO_TICKS(50));   /* 50ms 轮询, 不占满 CPU   */
+		}
 		return true;
 	}
 	for (int tick = 0; tick < timeout_ms; tick++)   /* 带超时, 1ms 精度 */
@@ -58,13 +61,11 @@ static bool finger_do_enroll(void)
  ***********************************************************************/
 static bool finger_do_verify(void)
 {
-	OLED_Clear();
-	OLED_PrintString(0,0,"Verify Finger");
-
-	if(!finger_wait_touch(5000))
-		return false;
 	bool ok = Finger_Search();
-	OLED_PrintString(0,2,ok ? "Finger:Pass":"Finger:Fail");
+	if (ok) {
+		Voice_IO3_Trigger();     /* 指纹验证成功语音 */
+		g_sw_armed = 0;          /* 解除报警/撤防     */
+	}
 	return ok;
 }
 
@@ -83,7 +84,8 @@ void FingerTask(void *pvParameters)
 	{
 		g_heartbeat_finger++;
 		finger_wait_touch(0);               /* 永久等待手指按下         */
-		finger_do_verify();                 /* 执行搜索 + 显示结果      */
+		vTaskDelay(pdMS_TO_TICKS(200));     /* 等手指按实再取图         */
+		finger_do_verify();                 /* 执行搜索                */
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }

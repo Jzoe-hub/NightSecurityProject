@@ -42,7 +42,7 @@ typedef struct{
 // 下行命令包 (ESP8266→CommTask→SecurityTask)
 typedef struct{
 	uint8_t  type;           // ESP_TYPE_CMD / ESP_TYPE_CONFIG
-	uint8_t  json[192];      // JSON 字符串
+	uint8_t  json[128];      // JSON 字符串 (命令最大约80字节)
 	uint16_t len;            // JSON 实际长度
 }CloudRxPacket;
 

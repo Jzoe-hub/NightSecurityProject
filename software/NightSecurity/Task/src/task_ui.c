@@ -6,6 +6,7 @@
 #include "task_config.h"
 #include "oled.h"
 #include "key.h"
+#include "voice.h"
 #include <stdio.h>
 
 /* ==================== 内部状态变量 ==================== */
@@ -167,6 +168,8 @@ static void ui_run_menu(uint8_t key_event)
 	else if (cur_page == 0 && key_event == 2)    /* 监控页: 布防/撤防 */
 	{
 		g_sw_armed = !g_sw_armed;
+		if (g_sw_armed)                          /* 布防成功 */
+			Voice_IO4_Trigger();
 	}
 	else if (cur_page == 1 && key_event == 2)    /* 设置页: 光标下移 */
 	{
