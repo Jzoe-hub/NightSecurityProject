@@ -1,6 +1,0 @@
-../Lib/src/voice.c:14:13:voice_trigger	16	static
-../Lib/src/voice.c:27:6:Voice_IO1_Trigger	8	static
-../Lib/src/voice.c:36:6:Voice_IO2_Trigger	8	static
-../Lib/src/voice.c:45:6:Voice_IO3_Trigger	8	static
-../Lib/src/voice.c:54:6:Voice_IO4_Trigger	8	static
-../Lib/src/voice.c:64:9:Voice_IsBusy	8	static

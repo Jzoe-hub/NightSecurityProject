@@ -1,3 +1,0 @@
-../Task/src/task_watchdog.c:39:13:wdg_check_heartbeats	6
-../Task/src/task_watchdog.c:70:13:wdg_feed	1
-../Task/src/task_watchdog.c:86:6:WatchdogTask	2

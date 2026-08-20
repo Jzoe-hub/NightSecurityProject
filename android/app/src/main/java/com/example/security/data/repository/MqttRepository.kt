@@ -1,6 +1,7 @@
 package com.example.security.data.repository
 
 import com.example.security.data.model.SensorState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import android.util.Log
@@ -177,6 +178,120 @@ class MqttRepository {
             Log.d("MQTT", "PUB topic=$topic payload=$json")
         } catch (e: Exception) {
             Log.e("MQTT", "Publish failed", e)
+        }
+    }
+
+    /* ==================== OTA 固件升级 ==================== */
+
+    /* OTA 进度状态（0f~1f）与状态文字 */
+    private val _otaProgress = MutableStateFlow(0f)
+    val otaProgress: StateFlow<Float> = _otaProgress
+    private val _otaStatus = MutableStateFlow("未开始")
+    val otaStatus: StateFlow<String> = _otaStatus
+
+    /**
+     * CRC16-MODBUS 校验（与 STM32 Bootloader / ESP8266 端算法一致）
+     */
+    fun crc16Modbus(data: ByteArray): Int {
+        var crc = 0xFFFF
+        for (b in data) {
+            crc = crc xor (b.toInt() and 0xFF)
+            for (j in 0 until 8) {
+                crc = if ((crc and 0x0001) != 0) (crc ushr 1) xor 0xA001 else crc ushr 1
+            }
+        }
+        return crc and 0xFFFF
+    }
+
+    /** 发升级指令：/cmd JSON "ota" → STM32 APP 写标志重启进 Bootloader */
+    fun sendUpgradeCommand() {
+        publish("women_safe/device_001/cmd", "{\"action\":\"ota\"}")
+    }
+
+    /** 发固件开始：/fw/start，payload = 总大小(4B 大端) + 总CRC(2B 大端) */
+    private fun sendFwStart(totalSize: Int, totalCrc: Int) {
+        val payload = ByteArray(6)
+        payload[0] = ((totalSize shr 24) and 0xFF).toByte()
+        payload[1] = ((totalSize shr 16) and 0xFF).toByte()
+        payload[2] = ((totalSize shr 8)  and 0xFF).toByte()
+        payload[3] = ( totalSize        and 0xFF).toByte()
+        payload[4] = ((totalCrc shr 8)  and 0xFF).toByte()
+        payload[5] = ( totalCrc         and 0xFF).toByte()
+        publishBinary("women_safe/device_001/fw/start", payload)
+    }
+
+    /** 发固件数据块：/fw/data，payload = 块序号(2B 大端) + 数据 */
+    private fun sendFwData(seq: Int, chunk: ByteArray) {
+        val payload = ByteArray(2 + chunk.size)
+        payload[0] = ((seq shr 8) and 0xFF).toByte()
+        payload[1] = ( seq        and 0xFF).toByte()
+        System.arraycopy(chunk, 0, payload, 2, chunk.size)
+        publishBinary("women_safe/device_001/fw/data", payload)
+    }
+
+    /** 发固件结束：/fw/end，空 payload */
+    private fun sendFwEnd() {
+        publishBinary("women_safe/device_001/fw/end", ByteArray(0))
+    }
+
+    /** 二进制 publish（固件是二进制，不能用字符串版） */
+    private fun publishBinary(topic: String, payload: ByteArray) {
+        try {
+            if (!client.isConnected) {
+                _otaStatus.value = "MQTT 未连接"
+                return
+            }
+            val msg = MqttMessage(payload).apply { qos = 1 }
+            client.publish(topic, msg)
+        } catch (e: Exception) {
+            Log.e("MQTT", "Publish binary failed", e)
+            _otaStatus.value = "发送失败: ${e.message}"
+        }
+    }
+
+    /**
+     * 完整 OTA 升级流程（协程中调用，避免阻塞 UI）：
+     * 发升级指令 → 等重启 → 发固件头 → 分块发数据 → 发结束
+     */
+    suspend fun startOta(firmware: ByteArray) {
+        val totalSize = firmware.size
+        val totalCrc  = crc16Modbus(firmware)
+        val totalBlocks = (totalSize + 125) / 126   /* 向上取整块数 */
+        _otaProgress.value = 0f
+
+        try {
+            _otaStatus.value = "① 发送升级指令..."
+            sendUpgradeCommand()
+
+            /* 等 STM32 写标志并重启进 Bootloader */
+            delay(2500)
+
+            _otaStatus.value = "② 发送固件头（$totalSize 字节）..."
+            sendFwStart(totalSize, totalCrc)
+            delay(800)
+
+            /* 分块发送：每块数据 126 字节（payload = 2B 块序号 + 126B 数据） */
+            val chunkSize = 126
+            var seq = 0
+            var offset = 0
+            while (offset < totalSize) {
+                val len = minOf(chunkSize, totalSize - offset)
+                val chunk = firmware.copyOfRange(offset, offset + len)
+                sendFwData(seq, chunk)
+                offset += len
+                seq++
+                _otaProgress.value = offset.toFloat() / totalSize
+                _otaStatus.value = "③ 发送固件块 ${seq}/${totalBlocks}"
+                delay(15)   /* 块间小延时，避免 ESP8266 处理不过来 */
+            }
+
+            _otaProgress.value = 1f
+            _otaStatus.value = "④ 发送结束，等待设备校验..."
+            sendFwEnd()
+            _otaStatus.value = "升级完成 ✅"
+        } catch (e: Exception) {
+            Log.e("MQTT", "OTA failed", e)
+            _otaStatus.value = "升级失败: ${e.message}"
         }
     }
 }

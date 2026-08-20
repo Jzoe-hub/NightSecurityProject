@@ -1,6 +1,0 @@
-../Task/src/task_ui.c:32:13:ui_show_sensors	2
-../Task/src/task_ui.c:56:13:ui_show_alarm	3
-../Task/src/task_ui.c:73:13:ui_show_setting	8
-../Task/src/task_ui.c:103:16:ui_scan_keys	10
-../Task/src/task_ui.c:152:13:ui_run_menu	19
-../Task/src/task_ui.c:201:6:UITask	1

@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.security.data.repository.MqttRepository
 import com.example.security.ui.screen.dashboard.DashboardScreen
 import com.example.security.ui.screen.emergency.EmergencyCallScreen
+import com.example.security.ui.screen.ota.OtaScreen
 import com.example.security.ui.screen.settings.SettingsScreen
 
 private data class NavItem(
@@ -57,11 +58,17 @@ fun AppNavigation() {
                 1 -> EmergencyCallScreen()
                 2 -> {
                     val repo = remember { MqttRepository.getInstance() }
-                    SettingsScreen(
-                        onSendThresholds = { fire, smoke, co, temp, pir ->
-                            repo.sendThresholds(fire, smoke, co, temp, pir)
-                        }
-                    )
+                    var showOta by remember { mutableStateOf(false) }
+                    if (showOta) {
+                        OtaScreen(onBack = { showOta = false })
+                    } else {
+                        SettingsScreen(
+                            onSendThresholds = { fire, smoke, co, temp, pir ->
+                                repo.sendThresholds(fire, smoke, co, temp, pir)
+                            },
+                            onOpenOta = { showOta = true }
+                        )
+                    }
                 }
             }
         }

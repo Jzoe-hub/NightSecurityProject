@@ -21,6 +21,8 @@ uint8_t state_result;
 AlarmCMD Security_Data;
 uint8_t g_sw_armed = 0;
 
+extern void OTA_EnterBootloader(void);   /* OTA 写标志 + 重启（task_ota.c） */
+
 /* ==================== 融合处理子函数 ==================== */
 
 /**********************************************************************
@@ -242,6 +244,8 @@ void SecurityTask(void *pvParameters)
 				g_sw_armed = 1;
 			} else if (strstr((char*)cmd.json, "\"action\":\"disarm\"")) {
 				g_sw_armed = 0;
+			} else if (strstr((char*)cmd.json, "\"action\":\"ota\"")) {
+				OTA_EnterBootloader();   /* 写标志 + 重启进 Bootloader，永不返回 */
 			} else if (strstr((char*)cmd.json, "\"config\"")) {
 				int v;
 				v = json_get_int((char*)cmd.json, "fire");  if (v >= 0) th_fire  = (uint16_t)v;

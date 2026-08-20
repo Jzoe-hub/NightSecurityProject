@@ -24,11 +24,35 @@
 #define ESP_FRAME_QUEUE_LEN 2      /* 接收帧环形缓冲区（省RAM）       */
 
 /* ==================== TYPE 码 ==================== */
-#define ESP_TYPE_STATE      0x01   /* 上行: 传感器状态上报     */
-#define ESP_TYPE_HEARTBEAT  0x02   /* 上行: 心跳               */
-#define ESP_TYPE_CMD        0x03   /* 下行: 控制命令           */
-#define ESP_TYPE_CONFIG     0x04   /* 下行: 阈值配置           */
+#define ESP_TYPE_STATE      0x01   /* 上行: 传感器状态上报  			  */
+#define ESP_TYPE_HEARTBEAT  0x02   /* 上行: 心跳           			  */
+#define ESP_TYPE_CMD        0x03   /* 下行: 控制命令      		      */
+#define ESP_TYPE_CONFIG     0x04   /* 下行: 阈值配置      		      */
 
+#define ESP_TYPE_OTA_START  0x05   /* 下行: OTA 开始升级(总大小+总CRC) */
+#define ESP_TYPE_OTA_DATA   0x06   /* 下行: OTA 数据块(块序号+数据)    */
+#define ESP_TYPE_OTA_END    0x07   /* 下行: OTA 传输结束               */
+#define ESP_TYPE_OTA_ACK    0x08   /* 上行: OTA 应答(状态+块序号)      */
+
+/* ==================== OTA PAYLOAD 布局 ==================== */
+/* OTA_START: [总大小 4B][总CRC 2B] */
+#define OTA_START_SIZE_OFF      0
+#define OTA_START_SIZE_LEN      4
+#define OTA_START_CRC_OFF       4
+#define OTA_START_CRC_LEN       2
+
+/* OTA_DATA: [块序号 2B][数据 126B] */
+#define OTA_DATA_SEQ_OFF 		0
+#define OTA_DATA_SEQ_LEN 		2
+#define OTA_DATA_PAYLOAD_OFF 	2
+#define OTA_DATA_PAYLOAD_LEN 	126
+/* OTA_END: 空 */
+
+/* OTA_ACK: [状态 1B][块序号 2B] */
+#define OTA_ACK_STATE_OFF 		0
+#define OTA_ACK_STATE_LEN 		1
+#define OTA_ACK_SEQ_OFF 	1
+#define OTA_ACK_SEQ_LEN 	2
 /* ==================== 接收帧结构体 ==================== */
 typedef struct {
     uint8_t  type;                     /* 帧类型                 */

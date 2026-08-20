@@ -20,7 +20,7 @@ static uint8_t  rx_dma_buf[ESP_RX_BUF_SIZE];
 
 /* 帧解析中间状态 */
 static uint8_t  rx_parse_buf[ESP_FRAME_BUF_SIZE];
-static uint16_t rx_parse_len  = 0;
+static uint16_t rx_parse_len  = 0;		//接收的帧长度
 
 /* 接收帧环形缓冲区 */
 static EspFrame rx_frame_ring[ESP_FRAME_QUEUE_LEN];
@@ -39,17 +39,17 @@ static uint8_t  rx_frame_count = 0;   /* 当前帧数 */
  ***********************************************************************/
 static uint16_t crc16_modbus(uint8_t *data, uint16_t len)
 {
-    uint16_t crc = 0xFFFF;
-    for (uint16_t i = 0; i < len; i++) {
-        crc ^= data[i];
-        for (uint8_t j = 0; j < 8; j++) {
-            if (crc & 0x0001)
-                crc = (crc >> 1) ^ 0xA001;
-            else
-                crc >>= 1;
-        }
-    }
-    return crc;
+	uint16_t crc = 0xFFFF;              // 1. 从一个固定初值开始
+	for (uint16_t i = 0; i < len; i++) {
+	    crc ^= data[i];                 // 2. 把当前字节"揉进"crc（异或）
+	    for (uint16_t j = 0; j < 8; j++) {       // 3. 揉完再搅 8 次
+	        if (crc & 0x0001)           //    最低位是 1 就...
+	            crc = (crc >> 1) ^ 0xA001;  // 右移再异或一个固定值
+	        else
+	            crc >>= 1;              //    否则只右移
+	    }
+	}
+	return crc;                         // 4. 得到 2 字节"指纹"
 }
 
 /* ==================== 帧解析 ==================== */
@@ -142,6 +142,7 @@ void Esp8266_ProcessRxData(uint16_t size)
     if (size > 0 && size <= ESP_RX_BUF_SIZE) {
         esp8266_parse_frame(rx_dma_buf, size);
     }
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_dma_buf, ESP_RX_BUF_SIZE);  /* ★ 重启接收，让 IDLE 中断重新上岗 */
 }
 
 /* ==================== 公开接口 ==================== */

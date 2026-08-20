@@ -18,7 +18,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
-    onSendThresholds: ((String, String, String, String, String) -> Unit)? = null
+    onSendThresholds: ((String, String, String, String, String) -> Unit)? = null,
+    onOpenOta: (() -> Unit)? = null
 ) {
     val device by viewModel.deviceInfo.collectAsState()
     val status by viewModel.mqttStatus.collectAsState()
@@ -86,6 +87,26 @@ fun SettingsScreen(
             InfoRow("设备 ID", device.deviceId)
             InfoRow("固件版本", device.firmware)
             InfoRow("WiFi", "${device.wifiSsid}  ${device.wifiRssi}dBm")
+
+            /* ---- 系统 ---- */
+            SectionTitle("系统")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Button(
+                        onClick = { onOpenOta?.invoke() },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text("OTA 固件升级", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
 
             /* ---- 关于 ---- */
             SectionTitle("关于")

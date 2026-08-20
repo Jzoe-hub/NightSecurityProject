@@ -45,7 +45,7 @@ _Min_Stack_Size = 0x200; /* required amount of stack (MSP for ISRs only) */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 64K
+  FLASH    (rx)    : ORIGIN = 0x8002000,   LENGTH = 55K
 }
 
 /* Sections */

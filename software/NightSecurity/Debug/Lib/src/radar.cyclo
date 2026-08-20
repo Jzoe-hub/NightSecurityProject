@@ -1,3 +1,0 @@
-../Lib/src/radar.c:34:6:DataGet_LD2410C	7
-../Lib/src/radar.c:88:6:Radar_Init	1
-../Lib/src/radar.c:104:6:HAL_UARTEx_RxEventCallback	3

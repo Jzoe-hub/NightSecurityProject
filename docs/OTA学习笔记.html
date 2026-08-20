@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTA 无线升级 · 学习笔记</title>
+<style>
+:root{
+  --bg:#f5f4f0; --card:#ffffff; --text:#2c2c2a; --muted:#5f5e5a;
+  --line:#e4e2da; --blue:#185fa5; --blue-dark:#0c447c; --teal:#0f6e56;
+  --code-bg:#f1efe8;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+  line-height:1.7;}
+.wrap{max-width:760px;margin:0 auto;padding:32px 20px 64px;}
+header{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:28px 32px;margin-bottom:20px;}
+header h1{font-size:24px;margin:0 0 6px;font-weight:600;}
+header .sub{color:var(--muted);font-size:14px;}
+nav{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:16px 24px;margin-bottom:20px;line-height:2;}
+nav a{color:var(--blue);text-decoration:none;margin-right:16px;font-size:14px;white-space:nowrap;}
+nav a:hover{text-decoration:underline;}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:24px 28px;margin-bottom:20px;}
+section h2{font-size:18px;margin:0 0 10px;padding-left:12px;
+  border-left:4px solid var(--blue);font-weight:600;}
+section h2.teal{border-left-color:var(--teal);}
+section p{font-size:14px;margin:8px 0;}
+section .lead{color:var(--muted);}
+figure{margin:18px 0 6px;padding:14px;background:#fbfaf7;
+  border:1px solid var(--line);border-radius:12px;}
+figure svg{width:100%;height:auto;display:block;}
+figcaption{font-size:12px;color:var(--muted);margin-top:8px;text-align:center;}
+code{background:var(--code-bg);padding:2px 6px;border-radius:6px;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:13px;}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;overflow:auto;font-size:13px;line-height:1.6;}
+pre code{background:none;padding:0;}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0;}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;}
+th{background:#f1efe8;font-weight:600;}
+ul{margin:8px 0;padding-left:22px;font-size:14px;}
+li{margin:4px 0;}
+.done{color:var(--teal);font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>OTA 无线升级 · 学习笔记</h1>
+    <div class="sub">NightSecurity Project · Phase 4 ｜ 图文版 ｜ 2026-08-19 ｜ 文字版见 docs/技术学习笔记.md</div>
+  </header>
+
+  <nav>
+    <a href="#s1">1 程序怎么跑</a>
+    <a href="#s2">2 Bootloader</a>
+    <a href="#s3">3 OTA</a>
+    <a href="#s4">4 内存分区</a>
+    <a href="#s5">5 中断向量表</a>
+    <a href="#s6">6 VTOR 重映射</a>
+    <a href="#s7">7 栈与栈顶</a>
+    <a href="#s8">8 概念总览</a>
+    <a href="#s9">9 跳转三步</a>
+    <a href="#s10">10 写 Flash</a>
+    <a href="#s11">11 CRC 校验</a>
+    <a href="#s12">12 升级标志位</a>
+    <a href="#s13">13 APP 写标志</a>
+    <a href="#s14">14 真无线转发</a>
+  </nav>
+
+  <section id="s1">
+    <h2>1. 程序是怎么跑起来的</h2>
+    <p>STM32 的 Flash（闪存）是一排小格子，每个格子里存一条机器指令。在 CubeIDE 点「下载」，就是把编译好的程序按顺序塞进这排格子。</p>
+    <p>芯片一上电（复位），CPU 不会思考，只会做一件机械的事：<b>从第 0 个格子（地址 0x08000000）开始，一条一条往下读、往下执行</b>。</p>
+    <figure>
+      <svg viewBox="0 0 680 254" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>Flash 分区与 Bootloader 是什么</title>
+        <desc>Flash 是一排格子，最前面是 Bootloader 管家，后面是 APP 业务程序，开机永远先跑 Bootloader</desc>
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <text x="40" y="44" font-size="13" font-weight="500" fill="#2C2C2A">Flash 内存（一排格子，存的是机器指令）</text>
+        <rect x="60" y="60" width="200" height="80" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="160" y="92" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">Bootloader</text>
+        <text x="160" y="112" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">管家 · 开机先跑</text>
+        <rect x="262" y="60" width="358" height="80" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="441" y="92" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">APP 业务程序</text>
+        <text x="441" y="112" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">你的安防程序（以后可升级）</text>
+        <rect x="55" y="190" width="120" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <text x="115" y="212" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="#2C2C2A">复位上电</text>
+        <line x1="179" y1="212" x2="197" y2="212" stroke="#888780" stroke-width="1.5" marker-end="url(#a1)"/>
+        <rect x="205" y="190" width="120" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <text x="265" y="212" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="#2C2C2A">Bootloader 先跑</text>
+        <line x1="329" y1="212" x2="347" y2="212" stroke="#888780" stroke-width="1.5" marker-end="url(#a1)"/>
+        <rect x="355" y="190" width="120" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <text x="415" y="212" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="#2C2C2A">要不要升级？</text>
+        <line x1="479" y1="212" x2="497" y2="212" stroke="#888780" stroke-width="1.5" marker-end="url(#a1)"/>
+        <rect x="505" y="190" width="120" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="565" y="212" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="#085041">跳转跑 APP</text>
+      </svg>
+      <figcaption>Flash 是一排格子，开机永远从最前面的 Bootloader 开始跑</figcaption>
+    </figure>
+  </section>
+
+  <section id="s2">
+    <h2>2. Bootloader 是什么：一个「管家」</h2>
+    <p>核心死结：<b>程序正在运行的时候，不能把自己覆盖掉。</b> 就像开车时没法同时换自己的轮胎，得先停车，让一个「站在车外的人」来换。</p>
+    <p>Bootloader 就是这个「站在车外的人」，是写在 Flash 最前面的一段小程序：</p>
+    <ul>
+      <li>它永远不被升级、永远不动（换轮胎的人自己不能被换掉）</li>
+      <li>它只干一件事：开机时检查「要不要升级」——要就换，不要（或换完）就把控制权交给 APP</li>
+    </ul>
+    <p>类比电脑开机：先跑 <b>BIOS</b>（=Bootloader），再进 <b>Windows</b>（=APP）。重装系统是先重启进引导界面装，不是在 Windows 里删掉正在运行的 Windows。</p>
+  </section>
+
+  <section id="s3">
+    <h2>3. OTA 是什么：负责「送货」</h2>
+    <p>OTA = Over-The-Air，直译「通过无线/空中」。它只回答一个问题：<b>新程序走哪条路送到设备手里？</b></p>
+    <ul>
+      <li>普通刷机：数据线（SWD 调试器）直接塞进 Flash</li>
+      <li>OTA 刷机：不插线，用网络送过来</li>
+    </ul>
+    <table>
+      <tr><th>名词</th><th>负责的事</th><th>类比</th></tr>
+      <tr><td>Bootloader</td><td>收货、验货、安装程序</td><td>帮你换轮胎的师傅</td></tr>
+      <tr><td>OTA</td><td>把新程序送到设备面前</td><td>送轮胎上门的快递</td></tr>
+    </table>
+    <p><b>Bootloader 负责「装」，OTA 负责「送」</b>，是搭档不是同一个东西。</p>
+    <figure>
+      <svg viewBox="0 0 680 452" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>OTA 升级链路</title>
+        <desc>固件从 Android APP 经 MQTT Broker 和 ESP8266 到达 STM32 的传输链路</desc>
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <rect x="180" y="40" width="320" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="340" y="58" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">Android APP</text>
+        <text x="340" y="76" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">选固件 · 点升级</text>
+        <line x1="340" y1="96" x2="340" y2="148" stroke="#888780" stroke-width="1.5" marker-end="url(#a2)"/>
+        <rect x="180" y="152" width="320" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="340" y="170" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">MQTT Broker (EMQX)</text>
+        <text x="340" y="188" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">云端中转</text>
+        <line x1="340" y1="208" x2="340" y2="260" stroke="#888780" stroke-width="1.5" marker-end="url(#a2)"/>
+        <rect x="180" y="264" width="320" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="340" y="282" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">ESP8266-01S</text>
+        <text x="340" y="300" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">MQTT ↔ UART 桥接</text>
+        <line x1="340" y1="320" x2="340" y2="372" stroke="#888780" stroke-width="1.5" marker-end="url(#a2)"/>
+        <rect x="180" y="376" width="320" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="340" y="394" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">STM32F103</text>
+        <text x="340" y="412" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">Bootloader · 写 Flash · 跳转</text>
+      </svg>
+      <figcaption>本项目的固件传输路线：APP → MQTT → ESP8266 → UART → STM32</figcaption>
+    </figure>
+  </section>
+
+  <section id="s4">
+    <h2>4. 内存分区</h2>
+    <p>程序的「家」在哪、有多大，由<b>链接脚本</b>（CubeIDE 工程根目录下的 <code>.ld</code> 文件，本项目是 <code>STM32F103C8TX_FLASH.ld</code>）决定，关键在 <code>MEMORY</code> 段。</p>
+    <pre><code>MEMORY
+{
+  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
+  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 64K
+}</code></pre>
+    <table>
+      <tr><th>词</th><th>含义</th></tr>
+      <tr><td>ORIGIN</td><td>起始地址 = 程序住进 Flash 的「第几格」</td></tr>
+      <tr><td>LENGTH</td><td>总容量 = 从起点往后一共有多少格</td></tr>
+    </table>
+    <p>本项目实际值（亲手读出）：FLASH 0x08000000 起、64K；RAM 0x20000000 起、20K。</p>
+    <p>做 Bootloader 的本质就是<b>分区</b>：把 APP 往后挪，最前面让给管家。</p>
+    <figure>
+      <svg viewBox="0 0 680 434" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>STM32 Flash 分区与 IAP 原理</title>
+        <desc>Flash 划分为 Bootloader 和 APP 两个区，复位后先跑 Bootloader 再跳转 APP</desc>
+        <defs>
+          <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <text x="172" y="58" text-anchor="end" font-size="12" fill="#2C2C2A">0x0800 0000</text>
+        <line x1="176" y1="58" x2="184" y2="58" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="2 2"/>
+        <text x="172" y="126" text-anchor="end" font-size="12" fill="#2C2C2A">0x0800 2000</text>
+        <line x1="176" y1="126" x2="184" y2="126" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="2 2"/>
+        <text x="172" y="336" text-anchor="end" font-size="12" fill="#2C2C2A">0x0801 0000</text>
+        <line x1="176" y1="336" x2="184" y2="336" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="2 2"/>
+        <rect x="184" y="50" width="360" height="280" rx="16" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <rect x="184" y="50" width="360" height="70" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="364" y="76" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">Bootloader · 8 KB</text>
+        <text x="364" y="96" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">引导程序 · 固定先跑</text>
+        <rect x="184" y="120" width="360" height="210" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="364" y="215" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">APP · 56 KB</text>
+        <text x="364" y="235" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">业务固件 · 可升级替换</text>
+        <rect x="70" y="370" width="140" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <text x="140" y="392" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">复位</text>
+        <line x1="214" y1="392" x2="262" y2="392" stroke="#888780" stroke-width="1.5" marker-end="url(#a3)"/>
+        <rect x="270" y="370" width="140" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <text x="340" y="392" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">Bootloader 检查</text>
+        <line x1="414" y1="392" x2="462" y2="392" stroke="#888780" stroke-width="1.5" marker-end="url(#a3)"/>
+        <rect x="470" y="370" width="140" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="540" y="392" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#085041">跳转 APP</text>
+      </svg>
+      <figcaption>分区方案：Bootloader 8K + APP 56K（联调通过）</figcaption>
+    </figure>
+  </section>
+
+  <section id="s5">
+    <h2>5. 中断向量表：一张「电话本」</h2>
+    <p>芯片复位后，CPU 会去 Flash 最前面（第 0 格）翻一张表——<b>中断向量表</b>，它记录「每种突发事件（中断）该跳到哪里处理」。就像紧急电话本：火警→119、急救→120。</p>
+    <p>前两格是特例，复位时 CPU 唯一会用的就是它们：第 0 格放初始栈顶，第 1 格放复位函数。</p>
+    <figure>
+      <svg viewBox="0 0 680 348" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>中断向量表是一张电话本</title>
+        <desc>中断向量表存在 Flash 最前面，每格记录一种中断对应的处理函数地址，前两格是复位时 CPU 唯一读取的</desc>
+        <text x="40" y="42" font-size="14" font-weight="500" fill="#2C2C2A">中断向量表（电话本）—— 存在 Flash 最前面，复位时 CPU 先来翻它</text>
+        <rect x="60" y="60" width="560" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="90" y="82" dominant-baseline="central" font-size="12" fill="#5F5E5A">第 0 格</text>
+        <text x="180" y="74" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">_estack</text>
+        <text x="180" y="92" dominant-baseline="central" font-size="12" fill="#5F5E5A">初始栈顶 · 工作台的顶端</text>
+        <rect x="60" y="116" width="560" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="90" y="138" dominant-baseline="central" font-size="12" fill="#5F5E5A">第 1 格</text>
+        <text x="180" y="130" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">Reset_Handler</text>
+        <text x="180" y="148" dominant-baseline="central" font-size="12" fill="#5F5E5A">复位后第一个执行的函数</text>
+        <rect x="60" y="172" width="560" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="90" y="194" dominant-baseline="central" font-size="12" fill="#5F5E5A">第 2 格</text>
+        <text x="180" y="186" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">HardFault_Handler</text>
+        <text x="180" y="204" dominant-baseline="central" font-size="12" fill="#5F5E5A">程序崩溃时的兜底</text>
+        <rect x="60" y="228" width="560" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="90" y="250" dominant-baseline="central" font-size="12" fill="#5F5E5A">中间格</text>
+        <text x="180" y="242" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">SysTick_Handler</text>
+        <text x="180" y="260" dominant-baseline="central" font-size="12" fill="#5F5E5A">FreeRTOS 的心跳节拍</text>
+        <rect x="60" y="284" width="560" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="90" y="306" dominant-baseline="central" font-size="12" fill="#5F5E5A">中间格</text>
+        <text x="180" y="298" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">USART / DMA / ADC_IRQ</text>
+        <text x="180" y="316" dominant-baseline="central" font-size="12" fill="#5F5E5A">串口·传感器·DMA 的中断</text>
+      </svg>
+      <figcaption>整张表 66 格 = 264 字节（最后一项 BootRAM 偏移 0x108）</figcaption>
+    </figure>
+  </section>
+
+  <section id="s6">
+    <h2>6. VTOR 重映射</h2>
+    <p>APP 搬到 0x08002000 后，它自己也有一张向量表。但 CPU 复位时是硬件写死的——永远先去 0x08000000 翻 Bootloader 的表。若跳转后不告诉 CPU「表换地方了」，APP 的中断会去翻错表，<b>系统看起来能启动，但一有中断就崩/没反应</b>。</p>
+    <p>解法：Bootloader 跳转前，设置 <b>VTOR</b> 寄存器（向量表偏移寄存器）：</p>
+    <pre><code>SCB-&gt;VTOR = 0x08002000;   // 以后翻电话本，去 APP 这儿翻</code></pre>
+    <figure>
+      <svg viewBox="0 0 680 232" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>VTOR 重映射示意</title>
+        <desc>VTOR 是电话本位置的定位器，复位默认指向 Bootloader 的表，跳转前要拨到 APP 的表</desc>
+        <defs>
+          <marker id="a5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <text x="40" y="44" font-size="14" font-weight="500" fill="#2C2C2A">VTOR = 「电话本放在哪」的定位器</text>
+        <rect x="60" y="70" width="240" height="70" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="180" y="96" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">电话本①</text>
+        <text x="180" y="116" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#5F5E5A">Bootloader 的表 · 0x08000000</text>
+        <rect x="380" y="70" width="240" height="70" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="500" y="96" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">电话本②</text>
+        <text x="500" y="116" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#5F5E5A">APP 的表 · 0x08002000</text>
+        <line x1="300" y1="105" x2="372" y2="105" stroke="#993C1D" stroke-width="1.5" marker-end="url(#a5)"/>
+        <text x="336" y="92" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#993C1D">跳转前拨过去</text>
+        <text x="40" y="176" font-size="13" fill="#2C2C2A">复位默认：VTOR → ①（硬件写死）</text>
+        <text x="40" y="198" font-size="13" fill="#2C2C2A">不拨过去：APP 的中断还去翻① → 翻到 Bootloader 的地址 → 全乱</text>
+      </svg>
+      <figcaption>跳转前把 VTOR 从 Bootloader 的表拨到 APP 的表</figcaption>
+    </figure>
+  </section>
+
+  <section id="s7">
+    <h2>7. 栈与栈顶</h2>
+    <p><b>栈（Stack）</b>是 RAM 里专门留出来的一块「临时存放区」，像一叠便签纸：调用函数往里压一张（压栈 push），返回往外拿一张（弹栈 pop），永远只能动最上面那张（后进先出）。</p>
+    <ul>
+      <li><b>栈顶</b> = 这叠便签最上面那张的位置</li>
+      <li><b>SP（栈指针）</b> = 记录「现在栈顶在哪儿」的寄存器</li>
+    </ul>
+    <p>复位第一步必须设栈顶，因为程序马上要调用函数、而调用函数就要压便签。栈顶 <code>_estack</code> = 0x20000000 + 20K = <b>0x20005000</b>（RAM 最高处，栈从高地址往低地址长）。</p>
+    <figure>
+      <svg viewBox="0 0 680 372" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>栈与栈顶示意</title>
+        <desc>栈是 RAM 里的一叠便签纸，从高地址往低地址生长，SP 指针记录当前栈顶</desc>
+        <defs>
+          <marker id="a6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <text x="40" y="42" font-size="14" font-weight="500" fill="#2C2C2A">栈 = RAM 里一叠「便签纸」，调用函数往下压、返回往外拿</text>
+        <rect x="110" y="70" width="80" height="230" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <rect x="110" y="70" width="80" height="26" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+        <rect x="110" y="96" width="80" height="26" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+        <rect x="110" y="122" width="80" height="26" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+        <rect x="110" y="148" width="80" height="26" fill="#1D9E75" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="210" y="80" font-size="12" fill="#2C2C2A">_estack = 0x20005000（初始栈顶 · RAM 顶端）</text>
+        <text x="210" y="295" font-size="12" fill="#2C2C2A">0x20000000（RAM 底端）</text>
+        <text x="210" y="126" font-size="12" fill="#5F5E5A">已压入的便签</text>
+        <text x="210" y="168" font-size="12" fill="#5F5E5A">函数调一次，压一张</text>
+        <line x1="268" y1="174" x2="194" y2="174" stroke="#993C1D" stroke-width="1.5" marker-end="url(#a6)"/>
+        <text x="278" y="174" font-size="12" fill="#993C1D">SP → 当前栈顶</text>
+        <text x="210" y="238" font-size="12" fill="#5F5E5A">还没用的空栈区</text>
+        <text x="40" y="336" font-size="13" fill="#2C2C2A">调用函数 = 往栈顶压一张（地址往下减小）</text>
+        <text x="40" y="358" font-size="13" fill="#2C2C2A">函数返回 = 拿走最上面那张（后进先出）</text>
+      </svg>
+      <figcaption>复位先设栈顶，否则函数调用没处落脚</figcaption>
+    </figure>
+  </section>
+
+  <section id="s8">
+    <h2 class="teal">概念关系总览：Flash 与 RAM</h2>
+    <p>所有名词都能归到两块内存里：<b>Flash</b>（断电不丢，住的地方）和 <b>RAM</b>（断电就丢，干活的地方）。</p>
+    <figure>
+      <svg viewBox="0 0 680 370" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>Flash 与 RAM 的概念关系</title>
+        <desc>Flash 是程序住的地方含向量表，RAM 是干活的地方含栈，向量表第 0 格存的是 RAM 里的栈顶地址</desc>
+        <defs>
+          <marker id="rel" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <text x="40" y="42" font-size="14" font-weight="500" fill="#2C2C2A">Flash（住的地方）与 RAM（干活的地方）是两块内存</text>
+        <rect x="50" y="58" width="270" height="252" rx="14" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <text x="185" y="78" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">Flash · 断电不丢 · 住的地方</text>
+        <rect x="64" y="90" width="242" height="78" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="185" y="108" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">中断向量表</text>
+        <text x="185" y="130" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">第 0 格 = 栈顶地址</text>
+        <text x="185" y="150" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">第 1 格 = 复位函数</text>
+        <rect x="64" y="178" width="242" height="116" rx="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+        <text x="185" y="236" text-anchor="middle" dominant-baseline="central" font-size="13" fill="#5F5E5A">程序代码（指令）</text>
+        <rect x="360" y="58" width="270" height="252" rx="14" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+        <text x="495" y="78" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">RAM · 断电就丢 · 干活的地方</text>
+        <rect x="374" y="90" width="242" height="120" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="495" y="112" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">栈（草稿纸）</text>
+        <text x="495" y="134" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">栈顶 = 0x20005000</text>
+        <text x="495" y="154" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">RAM 顶端 · 往下长</text>
+        <text x="495" y="174" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">SP 在这上下动</text>
+        <rect x="374" y="222" width="242" height="72" rx="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+        <text x="495" y="258" text-anchor="middle" dominant-baseline="central" font-size="13" fill="#5F5E5A">变量</text>
+        <line x1="306" y1="132" x2="370" y2="132" stroke="#993C1D" stroke-width="1.5" marker-end="url(#rel)"/>
+        <text x="40" y="330" font-size="13" fill="#2C2C2A">连接点：向量表在 Flash，但它第 0 格写的是 RAM 里的栈顶地址</text>
+        <text x="40" y="352" font-size="13" fill="#2C2C2A">Bootloader 和 APP 是两个程序，各住 Flash 一段，各用自己的向量表，共用同一块 RAM</text>
+      </svg>
+      <figcaption>向量表在 Flash，第 0 格写的是 RAM 里的栈顶地址</figcaption>
+    </figure>
+    <p><b>口诀</b>：程序住 Flash，干活用 RAM；向量表开在 Flash 最前面，第 0 格指向 RAM 的栈顶。</p>
+    <p><b>易混点</b>：Bootloader 的「栈」和 APP 的「栈」不是两块独立内存——RAM 总共 20K，两个程序<b>共用、轮流用</b>。设栈顶 = 把 SP 拨回 RAM 顶端，让 APP 从头干净地用。</p>
+  </section>
+
+  <section id="s9">
+    <h2>9. 跳转三步（设栈顶、读入口、跳转）· 已联调验证</h2>
+    <p>跳转 = <b>手动模拟一次复位</b>，对着 APP 的向量表重做开机的两拍。</p>
+    <figure>
+      <svg viewBox="0 0 680 444" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>Bootloader 跳转三步</title>
+        <desc>跳转就是手动模拟一次复位：设 VTOR、设栈顶、读入口、跳转，永不返回</desc>
+        <defs>
+          <marker id="jt" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <text x="40" y="40" font-size="14" font-weight="500" fill="#2C2C2A">跳转 = 手动模拟一次复位（对着 APP 的向量表重做一遍）</text>
+        <rect x="160" y="56" width="360" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text x="340" y="74" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">① 设 VTOR</text>
+        <text x="340" y="92" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">SCB-&gt;VTOR = 0x08002000 · 电话本拨过去</text>
+        <line x1="340" y1="112" x2="340" y2="156" stroke="#888780" stroke-width="1.5" marker-end="url(#jt)"/>
+        <rect x="160" y="160" width="360" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="340" y="178" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">② 设栈顶</text>
+        <text x="340" y="196" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">读 APP 第 0 格 → 写进 MSP · 架好工作台</text>
+        <line x1="340" y1="216" x2="340" y2="260" stroke="#888780" stroke-width="1.5" marker-end="url(#jt)"/>
+        <rect x="160" y="264" width="360" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="340" y="282" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">③ 读入口</text>
+        <text x="340" y="300" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">读 APP 第 1 格 → 得到 Reset_Handler 地址</text>
+        <line x1="340" y1="320" x2="340" y2="364" stroke="#888780" stroke-width="1.5" marker-end="url(#jt)"/>
+        <rect x="160" y="368" width="360" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text x="340" y="386" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">④ 跳转</text>
+        <text x="340" y="404" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">调用 Reset_Handler · 永不返回</text>
+      </svg>
+      <figcaption>跳转四步：设 VTOR → 设栈顶 → 读入口 → 跳转</figcaption>
+    </figure>
+    <pre><code>#define APP_ADDR 0x08002000
+typedef void (*pFunction)(void);
+
+void jump_to_app(void)
+{
+    uint32_t appStack = *(volatile uint32_t*)APP_ADDR;                    // 第 0 格：栈顶
+    pFunction appEntry = (pFunction)(*(volatile uint32_t*)(APP_ADDR+4)); // 第 1 格：入口
+    SCB-&gt;VTOR = APP_ADDR;   // 切换向量表
+    __set_MSP(appStack);    // 设栈顶
+    appEntry();             // 跳转，永不返回
+}</code></pre>
+    <p><b>两个易错点</b>：类型转换 `(pFunction)(*(volatile uint32_t*)(APP_ADDR+4))` 的 `*` 位置（先转指针 → 再解引用 → 再转函数指针类型）；`__set_MSP` 是函数（两个下划线），用法 `__set_MSP(appStack)` 不是赋值。</p>
+  </section>
+
+  <section id="s10">
+    <h2>10. 写 Flash：先擦除，再编程</h2>
+    <p><b>铁律</b>：Flash 只能「1→0」，要「0→1」必须整页擦除（擦成 0xFF）。所以写 Flash 永远是两步：<b>先擦除、再编程</b>。</p>
+    <table>
+      <tr><th>操作</th><th>粒度</th></tr>
+      <tr><td>擦除</td><td>1KB / 页（必须整页擦）</td></tr>
+      <tr><td>编程</td><td>半字（2 字节 / 次）</td></tr>
+    </table>
+    <p><b>HAL 四件套</b>：<code>HAL_FLASH_Unlock()</code> 解锁 → <code>HAL_FLASHEx_Erase()</code> 擦页 → <code>HAL_FLASH_Program()</code> 编程 → <code>HAL_FLASH_Lock()</code> 上锁。</p>
+    <p><b>两个必须记住的坑</b>：① 擦写期间要关中断（<code>__disable_irq()</code> 包住，因为 Flash 被改写时 CPU 不能从 Flash 取指令）；② 只用页擦除 <code>FLASH_TYPEERASE_PAGES</code>，绝不能整片擦（会把 Bootloader 自己也擦掉，变砖）。</p>
+  </section>
+
+  <section id="s11">
+    <h2>11. CRC 校验：单帧 + 整包</h2>
+    <p>两个层次：<b>单帧 CRC</b> 保证每一帧没传错；<b>总 CRC</b> 保证 400 多块合起来整体完整、没丢块、顺序没错。</p>
+    <p>START 帧带「总大小 + 总 CRC」，END 帧时把 Flash 里已写的固件整体重算一遍 CRC 比对：</p>
+    <pre><code>uint16_t calc = crc16_modbus((uint8_t*)0x08002000, ota_total_size);
+if (calc == ota_total_crc) { /* 校验通过 */ }</code></pre>
+    <p><b>踩坑</b>：函数要先声明后使用（C 从上往下编译），调用前加前置声明 <code>static uint16_t crc16_modbus(...)</code>。</p>
+  </section>
+
+  <section id="s12">
+    <h2>12. 升级标志位：断电兜底的灵魂</h2>
+    <p>Bootloader 只在「上电/复位」瞬间有控制权，所以 APP 想升级必须「<b>写标志 → 重启 → Bootloader 查标志</b>」。</p>
+    <p>标志位存 <b>Flash 最后一页 0x0800FC00</b>（不用 RTC Backup 寄存器，因为它依赖 VBAT 电池、真断电会丢 = 兜底失效）。</p>
+    <table>
+      <tr><th>操作</th><th>谁做</th><th>怎么做</th></tr>
+      <tr><td>写标志</td><td>APP（收到升级指令）</td><td>擦标志页 + 写魔数 0x5AA5</td></tr>
+      <tr><td>查标志</td><td>Bootloader（上电）</td><td>读 <code>*(uint16_t*)0x0800FC00 == 0x5AA5</code></td></tr>
+      <tr><td>清标志</td><td>Bootloader（升级成功）</td><td>擦标志页（擦成 0xFF）</td></tr>
+    </table>
+    <p><b>断电兜底</b>：升级到一半断电，标志还在（Flash 非易失），下次开机 Bootloader 还会查到标志、重进升级模式。这是标志位存在的核心价值。</p>
+  </section>
+
+  <section id="s13">
+    <h2>13. APP 写标志 + 重启（闭环的另一半）</h2>
+    <p>APP 不能自己覆盖自己，只能「写标志（告诉管家要升级）+ 重启（把控制权交回管家）」。标志页不在 APP 区，写它不会覆盖自己。</p>
+    <pre><code>void OTA_EnterBootloader(void)
+{
+    /* 擦标志页 + 写魔数 0x5AA5 */
+    ...
+    NVIC_SystemReset();   // 重启 → Bootloader 接管（效果 = 按复位键）
+}</code></pre>
+    <p><b>两个踩坑</b>：① 写标志 = 擦 + 写两步，漏了写魔数会白重启；② APP 的 USART2 用 DMA+IDLE 收帧，IDLE 中断触发一次后要重新调用 <code>HAL_UARTEx_ReceiveToIdle_DMA</code> 重启接收，否则收不到下一帧（原 AI 代码漏了重启）。</p>
+  </section>
+
+  <section id="s14">
+    <h2 class="teal">14. ESP8266 转发固件块（真无线）</h2>
+    <p>ESP8266 是<b>透明桥接</b>：不碰固件内容，只搬运。手机发 MQTT → 封装成帧 → 发 STM32。</p>
+    <table>
+      <tr><th>topic</th><th>方向</th><th>帧</th></tr>
+      <tr><td>/fw/start</td><td>下行</td><td>OTA_START（总大小+总CRC）</td></tr>
+      <tr><td>/fw/data</td><td>下行</td><td>OTA_DATA（块序号+数据）</td></tr>
+      <tr><td>/fw/end</td><td>下行</td><td>OTA_END</td></tr>
+      <tr><td>/fw/ack</td><td>上行</td><td>OTA_ACK（状态+块序号）</td></tr>
+    </table>
+    <p><b>关键坑</b>：① MQTT 包默认最大 128B，装不下固件块，要 <code>#define MQTT_MAX_PACKET_SIZE 512</code>（在 include 之前）；② 固件是二进制，不能用 JSON 字符串，用带长度的 publish。</p>
+    <p class="done">Phase 4 OTA 代码全部完成 ✅（真无线联调待实测）</p>
+  </section>
+</div>
+</body>
+</html>

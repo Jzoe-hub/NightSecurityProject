@@ -1,8 +1,0 @@
-../Task/src/task_sensor.c:40:13:read_adc_sensors	24	static
-../Task/src/task_sensor.c:58:13:read_binary_sensors	16	static
-../Task/src/task_sensor.c:76:13:read_dht11_data	16	static
-../Task/src/task_sensor.c:111:13:read_radar_data	24	static
-../Task/src/task_sensor.c:128:14:ewma_filter	40	static
-../Task/src/task_sensor.c:142:17:median_filter_3	32	static
-../Task/src/task_sensor.c:168:13:publish_sensor_data	64	static
-../Task/src/task_sensor.c:231:6:SensorTask	48	static

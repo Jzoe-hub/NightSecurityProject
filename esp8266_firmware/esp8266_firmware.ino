@@ -12,6 +12,7 @@
  ***********************************************************************/
 
 #include <ESP8266WiFi.h>
+#define MQTT_MAX_PACKET_SIZE 512    /* OTA: 默认128B装不下固件块(128B+帧头尾)，须在PubSubClient前调大 */
 #include <PubSubClient.h>
 
 /* ==================== 配置 (按实际环境修改) ==================== */
@@ -33,6 +34,10 @@
 #define TYPE_HEARTBEAT  0x02   /* 上行: 心跳                  */
 #define TYPE_CMD        0x03   /* 下行: 控制命令(arm/disarm) */
 #define TYPE_CONFIG     0x04   /* 下行: 阈值配置              */
+#define TYPE_OTA_START  0x05   /* 下行: OTA 开始(总大小+总CRC) */
+#define TYPE_OTA_DATA   0x06   /* 下行: OTA 数据块(块序号+数据) */
+#define TYPE_OTA_END    0x07   /* 下行: OTA 结束               */
+#define TYPE_OTA_ACK    0x08   /* 上行: OTA 应答(状态+块序号)  */
 
 /* ==================== MQTT Topic ==================== */
 /* 上行 (ESP8266 发布 → Broker → APP) */
@@ -41,6 +46,11 @@
 /* 下行 (APP → Broker → ESP8266 订阅接收) */
 #define TOPIC_SUB_CMD       "women_safe/" DEVICE_ID "/cmd"
 #define TOPIC_SUB_CONFIG    "women_safe/" DEVICE_ID "/config"
+/* OTA 固件（下行: 手机发固件块 / 上行: STM32 回 ACK） */
+#define TOPIC_SUB_FW_START  "women_safe/" DEVICE_ID "/fw/start"
+#define TOPIC_SUB_FW_DATA   "women_safe/" DEVICE_ID "/fw/data"
+#define TOPIC_SUB_FW_END    "women_safe/" DEVICE_ID "/fw/end"
+#define TOPIC_PUB_FW_ACK    "women_safe/" DEVICE_ID "/fw/ack"
 
 /* ==================== 全局对象 ==================== */
 WiFiClientSecure wifiClient;              /* SSL/TLS 加密           */
@@ -219,6 +229,10 @@ static void handle_frame(uint8_t type, uint8_t *payload, uint16_t len)
         case TYPE_HEARTBEAT:
             mqttClient.publish(TOPIC_PUB_HEARTBEAT, (const char*)payload);
             break;
+        case TYPE_OTA_ACK:
+            /* OTA 应答是二进制(状态1B+块序号2B)，用带长度的 publish，不能用字符串版 */
+            mqttClient.publish(TOPIC_PUB_FW_ACK, payload, len);
+            break;
         default:
             break;                             /* 未知类型, 忽略      */
     }
@@ -238,6 +252,12 @@ static void mqtt_callback(char *topic, uint8_t *data, unsigned int length)
         type = TYPE_CMD;
     } else if (strstr(topic, "/config")) {
         type = TYPE_CONFIG;
+    } else if (strstr(topic, "/fw/start")) {
+        type = TYPE_OTA_START;                 /* 固件开始: 总大小+总CRC */
+    } else if (strstr(topic, "/fw/data")) {
+        type = TYPE_OTA_DATA;                  /* 固件数据块: 块序号+数据 */
+    } else if (strstr(topic, "/fw/end")) {
+        type = TYPE_OTA_END;                   /* 固件结束 */
     } else {
         return;                                /* 未知 topic, 忽略    */
     }
@@ -284,6 +304,9 @@ static void connect_mqtt(void)
 
         mqttClient.subscribe(TOPIC_SUB_CMD);
         mqttClient.subscribe(TOPIC_SUB_CONFIG);
+        mqttClient.subscribe(TOPIC_SUB_FW_START);   /* 订阅固件转发下行 topic */
+        mqttClient.subscribe(TOPIC_SUB_FW_DATA);
+        mqttClient.subscribe(TOPIC_SUB_FW_END);
 
         /* 上线通知 */
         mqttClient.publish(TOPIC_PUB_STATE, "{\"type\":\"online\"}");
